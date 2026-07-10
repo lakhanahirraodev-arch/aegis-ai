@@ -22,6 +22,7 @@ enum WorkspaceRole {
   OWNER
   ADMIN
   ANALYST
+  MODERATOR
   REVIEWER
   VIEWER
 }
@@ -60,6 +61,8 @@ enum VerificationStatus {
 
 enum Platform {
   YOUTUBE
+  TWITCH
+  KICK
   INSTAGRAM
   TIKTOK
   FACEBOOK
@@ -240,6 +243,8 @@ enum AgentType {
   RESPONSE_DRAFT
   ANALYTICS
   COMMUNITY
+  LIVE_MODERATION
+  LIVE_INCIDENT
 }
 
 enum AgentRunStatus {
@@ -291,6 +296,114 @@ enum NotificationStatus {
   SUPPRESSED
 }
 
+enum LiveChannelStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  DISCONNECTED
+  ARCHIVED
+}
+
+enum LiveSessionStatus {
+  SCHEDULED
+  CONNECTING
+  LIVE
+  ENDED
+  FAILED
+  ARCHIVED
+}
+
+enum LiveMessageStatus {
+  RECEIVED
+  CLASSIFIED
+  ACTIONED
+  EXPIRED
+  QUARANTINED
+}
+
+enum LiveModerationCategory {
+  TOXICITY
+  HATE_SPEECH
+  SPAM
+  SCAM_LINK
+  BOT_ACTIVITY
+  RAID
+  HARASSMENT
+  THREAT
+  CHILD_SAFETY
+  NSFW
+  SELF_HARM
+  KEYWORD
+  SENTIMENT
+  OTHER
+}
+
+enum LiveModerationFindingStatus {
+  OPEN
+  ACKNOWLEDGED
+  CONFIRMED
+  DISMISSED
+  ESCALATED
+}
+
+enum LiveModerationActionType {
+  WARN
+  REPLY
+  DELETE_MESSAGE
+  TIMEOUT
+  MUTE
+  SHADOW_MUTE
+  BAN
+  SLOW_MODE_ENABLE
+  SLOW_MODE_UPDATE
+  NOTIFY_MODERATOR
+}
+
+enum LiveModerationActionSource {
+  POLICY_AUTOMATION
+  AI_ASSISTANT
+  HUMAN_MODERATOR
+}
+
+enum LiveModerationActionStatus {
+  SUGGESTED
+  PENDING_APPROVAL
+  QUEUED
+  APPLIED
+  FAILED
+  CANCELLED
+  REVERSED
+}
+
+enum LiveModerationPolicyStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum LiveModeratorRole {
+  LEAD
+  MODERATOR
+  OBSERVER
+}
+
+enum LiveAppealStatus {
+  OPEN
+  IN_REVIEW
+  ACCEPTED
+  REJECTED
+  CLOSED
+}
+
+enum LiveIncidentStatus {
+  OPEN
+  ACKNOWLEDGED
+  MITIGATING
+  RESOLVED
+  DISMISSED
+}
+
 model User {
   id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clerkUserId   String            @unique @map("clerk_user_id")
@@ -303,6 +416,9 @@ model User {
   assignedCases Case[]            @relation("CaseAssignee")
   requestedEnforcementActions EnforcementAction[] @relation("EnforcementRequester")
   approvedEnforcementActions  EnforcementAction[] @relation("EnforcementApprover")
+  liveModeratorAssignments LiveModeratorAssignment[]
+  requestedLiveModerationActions LiveModerationAction[] @relation("LiveActionRequester")
+  reviewedLiveAppeals LiveModeratorAppeal[] @relation("LiveAppealReviewer")
 
   @@map("users")
 }
@@ -333,6 +449,18 @@ model Workspace {
   jobRuns             JobRun[]
   notificationDeliveries NotificationDelivery[]
   caseEvidence        CaseEvidence[]
+  liveChannels        LiveChannel[]
+  liveModeratorAssignments LiveModeratorAssignment[]
+  liveModerationPolicies LiveModerationPolicy[]
+  liveSessions        LiveSession[]
+  liveChatMessages    LiveChatMessage[]
+  liveModerationFindings LiveModerationFinding[]
+  liveModerationActions LiveModerationAction[]
+  liveModeratorAppeals LiveModeratorAppeal[]
+  liveIncidents       LiveIncident[]
+  liveIncidentTimelineEntries LiveIncidentTimelineEntry[]
+  communityHealthSnapshots CommunityHealthSnapshot[]
+  liveMessageEvidence LiveMessageEvidence[]
   auditLogs           AuditLog[]
 
   @@map("workspaces")
@@ -367,6 +495,7 @@ model CreatorProfile {
   identityReferences   IdentityReference[]
   monitoringRules      MonitoringRule[]
   threatClusters       ThreatCluster[]
+  liveChannels         LiveChannel[]
 
   @@index([workspaceId, status])
   @@map("creator_profiles")
@@ -402,6 +531,7 @@ model ConnectedAccount {
   createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
   workspace         Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveChannels      LiveChannel[]
 
   @@unique([workspaceId, platform, externalAccountId])
   @@index([workspaceId, status])
@@ -497,6 +627,7 @@ model EvidenceItem {
   derivatives      EvidenceItem[] @relation("EvidenceDerivatives")
   caseEvidence     CaseEvidence[]
   embeddings       ContentEmbedding[]
+  liveMessageEvidence LiveMessageEvidence[]
 
   @@index([workspaceId, createdAt])
   @@index([workspaceId, legalHold, retentionUntil])
@@ -642,6 +773,7 @@ model AgentRun {
   createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   workspace        Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   findings         AgentFinding[]
+  liveModerationFindings LiveModerationFinding[]
 
   @@index([workspaceId, agentType, createdAt])
   @@index([traceId])
@@ -686,6 +818,273 @@ model ContentEmbedding {
 
   @@index([workspaceId, embeddingType, modelVersion])
   @@map("content_embeddings")
+}
+
+model LiveChannel {
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId        String            @map("workspace_id") @db.Uuid
+  creatorProfileId   String?           @map("creator_profile_id") @db.Uuid
+  connectedAccountId String?           @map("connected_account_id") @db.Uuid
+  platform           Platform
+  externalChannelId  String            @map("external_channel_id")
+  displayName        String            @map("display_name")
+  status             LiveChannelStatus @default(PENDING)
+  capabilities       Json              @default("{}")
+  settings           Json              @default("{}")
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace          Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creatorProfile     CreatorProfile?   @relation(fields: [creatorProfileId], references: [id], onDelete: SetNull)
+  connectedAccount   ConnectedAccount? @relation(fields: [connectedAccountId], references: [id], onDelete: SetNull)
+  moderatorAssignments LiveModeratorAssignment[]
+  moderationPolicies LiveModerationPolicy[]
+  sessions           LiveSession[]
+  communityHealthSnapshots CommunityHealthSnapshot[]
+
+  @@unique([workspaceId, platform, externalChannelId])
+  @@index([workspaceId, status])
+  @@map("live_channels")
+}
+
+model LiveModeratorAssignment {
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId   String            @map("workspace_id") @db.Uuid
+  liveChannelId String            @map("live_channel_id") @db.Uuid
+  userId        String            @map("user_id") @db.Uuid
+  role          LiveModeratorRole @default(MODERATOR)
+  active        Boolean           @default(true)
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace     Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveChannel   LiveChannel       @relation(fields: [liveChannelId], references: [id], onDelete: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([liveChannelId, userId])
+  @@index([workspaceId, userId, active])
+  @@map("live_moderator_assignments")
+}
+
+model LiveModerationPolicy {
+  id            String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId   String                     @map("workspace_id") @db.Uuid
+  liveChannelId String?                    @map("live_channel_id") @db.Uuid
+  name          String
+  status        LiveModerationPolicyStatus @default(DRAFT)
+  config        Json                       @default("{}")
+  version       Int                        @default(1)
+  createdAt     DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace     Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveChannel   LiveChannel?               @relation(fields: [liveChannelId], references: [id], onDelete: Cascade)
+  actions       LiveModerationAction[]
+
+  @@index([workspaceId, status])
+  @@index([liveChannelId, status])
+  @@map("live_moderation_policies")
+}
+
+model LiveSession {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId       String            @map("workspace_id") @db.Uuid
+  liveChannelId     String            @map("live_channel_id") @db.Uuid
+  externalSessionId String?           @map("external_session_id")
+  title             String?
+  status            LiveSessionStatus @default(SCHEDULED)
+  startedAt         DateTime?         @map("started_at") @db.Timestamptz(6)
+  endedAt           DateTime?         @map("ended_at") @db.Timestamptz(6)
+  metadata          Json              @default("{}")
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace         Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveChannel       LiveChannel       @relation(fields: [liveChannelId], references: [id], onDelete: Cascade)
+  chatMessages      LiveChatMessage[]
+  findings          LiveModerationFinding[]
+  actions           LiveModerationAction[]
+  incidents         LiveIncident[]
+  communityHealthSnapshots CommunityHealthSnapshot[]
+
+  @@unique([liveChannelId, externalSessionId])
+  @@index([workspaceId, status, startedAt])
+  @@map("live_sessions")
+}
+
+model LiveChatMessage {
+  id                    String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId           String            @map("workspace_id") @db.Uuid
+  liveSessionId         String            @map("live_session_id") @db.Uuid
+  platformMessageId     String            @map("platform_message_id")
+  authorExternalIdHash  String            @map("author_external_id_hash")
+  authorDisplayEncrypted String?          @map("author_display_encrypted")
+  contentEncrypted      String?           @map("content_encrypted")
+  normalizedContentHash String             @map("normalized_content_hash")
+  isModerator           Boolean           @default(false) @map("is_moderator")
+  status                LiveMessageStatus @default(RECEIVED)
+  receivedAt            DateTime          @default(now()) @map("received_at") @db.Timestamptz(6)
+  expiresAt             DateTime?         @map("expires_at") @db.Timestamptz(6)
+  metadata              Json              @default("{}")
+  workspace             Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveSession           LiveSession       @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
+  findings              LiveModerationFinding[]
+  actions               LiveModerationAction[]
+  evidence              LiveMessageEvidence[]
+
+  @@unique([liveSessionId, platformMessageId])
+  @@index([workspaceId, liveSessionId, receivedAt])
+  @@index([workspaceId, authorExternalIdHash, receivedAt])
+  @@map("live_chat_messages")
+}
+
+model LiveModerationFinding {
+  id                String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId       String                       @map("workspace_id") @db.Uuid
+  liveSessionId     String                       @map("live_session_id") @db.Uuid
+  liveChatMessageId String?                      @map("live_chat_message_id") @db.Uuid
+  agentRunId        String?                      @map("agent_run_id") @db.Uuid
+  category          LiveModerationCategory
+  status            LiveModerationFindingStatus @default(OPEN)
+  severity          DetectionSeverity           @default(MEDIUM)
+  confidence        Decimal                      @db.Decimal(5, 4)
+  rationale         String?
+  limitations       Json                         @default("[]")
+  policyVersion     String                       @map("policy_version")
+  createdAt         DateTime                     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime                     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace         Workspace                    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveSession       LiveSession                  @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
+  liveChatMessage   LiveChatMessage?             @relation(fields: [liveChatMessageId], references: [id], onDelete: SetNull)
+  agentRun          AgentRun?                    @relation(fields: [agentRunId], references: [id], onDelete: SetNull)
+  actions           LiveModerationAction[]
+
+  @@index([workspaceId, status, severity, createdAt])
+  @@index([liveSessionId, category, createdAt])
+  @@map("live_moderation_findings")
+}
+
+model LiveModerationAction {
+  id                String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId       String                     @map("workspace_id") @db.Uuid
+  liveSessionId     String                     @map("live_session_id") @db.Uuid
+  liveChatMessageId String?                    @map("live_chat_message_id") @db.Uuid
+  findingId         String?                    @map("finding_id") @db.Uuid
+  policyId          String?                    @map("policy_id") @db.Uuid
+  requestedById     String?                    @map("requested_by_id") @db.Uuid
+  actionType        LiveModerationActionType   @map("action_type")
+  source            LiveModerationActionSource
+  status            LiveModerationActionStatus @default(SUGGESTED)
+  reasonCode        String                     @map("reason_code")
+  explanation       String?
+  draftTextEncrypted String?                   @map("draft_text_encrypted")
+  policyVersion     String                     @map("policy_version")
+  idempotencyKey    String                     @map("idempotency_key")
+  providerReference String?                    @map("provider_reference")
+  appliedAt         DateTime?                  @map("applied_at") @db.Timestamptz(6)
+  createdAt         DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace         Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveSession       LiveSession                @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
+  liveChatMessage   LiveChatMessage?           @relation(fields: [liveChatMessageId], references: [id], onDelete: SetNull)
+  finding           LiveModerationFinding?     @relation(fields: [findingId], references: [id], onDelete: SetNull)
+  policy            LiveModerationPolicy?      @relation(fields: [policyId], references: [id], onDelete: SetNull)
+  requestedBy       User?                      @relation("LiveActionRequester", fields: [requestedById], references: [id], onDelete: SetNull)
+  appeals           LiveModeratorAppeal[]
+  timelineEntries   LiveIncidentTimelineEntry[]
+
+  @@unique([workspaceId, idempotencyKey])
+  @@index([liveSessionId, status, createdAt])
+  @@map("live_moderation_actions")
+}
+
+model LiveModeratorAppeal {
+  id                    String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId           String           @map("workspace_id") @db.Uuid
+  liveModerationActionId String          @map("live_moderation_action_id") @db.Uuid
+  appellantExternalIdHash String         @map("appellant_external_id_hash")
+  reasonEncrypted       String?          @map("reason_encrypted")
+  status                LiveAppealStatus @default(OPEN)
+  reviewedById          String?          @map("reviewed_by_id") @db.Uuid
+  reviewedAt            DateTime?        @map("reviewed_at") @db.Timestamptz(6)
+  outcomeReason         String?          @map("outcome_reason")
+  createdAt             DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace             Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveModerationAction  LiveModerationAction @relation(fields: [liveModerationActionId], references: [id], onDelete: Restrict)
+  reviewedBy            User?            @relation("LiveAppealReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status, createdAt])
+  @@map("live_moderator_appeals")
+}
+
+model LiveIncident {
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId       String               @map("workspace_id") @db.Uuid
+  liveSessionId     String               @map("live_session_id") @db.Uuid
+  category          LiveModerationCategory
+  status            LiveIncidentStatus   @default(OPEN)
+  severity          DetectionSeverity    @default(HIGH)
+  title             String
+  summary           String?
+  riskScore         Decimal              @default(0) @map("risk_score") @db.Decimal(5, 2)
+  openedAt          DateTime             @default(now()) @map("opened_at") @db.Timestamptz(6)
+  resolvedAt        DateTime?            @map("resolved_at") @db.Timestamptz(6)
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace         Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveSession       LiveSession          @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
+  timelineEntries   LiveIncidentTimelineEntry[]
+
+  @@index([workspaceId, status, severity, openedAt])
+  @@map("live_incidents")
+}
+
+model LiveIncidentTimelineEntry {
+  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId       String                @map("workspace_id") @db.Uuid
+  liveIncidentId    String                @map("live_incident_id") @db.Uuid
+  moderationActionId String?              @map("moderation_action_id") @db.Uuid
+  eventType         String                @map("event_type")
+  summary           String
+  metadata          Json                  @default("{}")
+  occurredAt        DateTime              @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  workspace         Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveIncident      LiveIncident          @relation(fields: [liveIncidentId], references: [id], onDelete: Cascade)
+  moderationAction  LiveModerationAction? @relation(fields: [moderationActionId], references: [id], onDelete: SetNull)
+
+  @@index([liveIncidentId, occurredAt])
+  @@map("live_incident_timeline_entries")
+}
+
+model CommunityHealthSnapshot {
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId       String       @map("workspace_id") @db.Uuid
+  liveChannelId     String       @map("live_channel_id") @db.Uuid
+  liveSessionId     String?      @map("live_session_id") @db.Uuid
+  score             Decimal      @db.Decimal(5, 2)
+  sentimentScore    Decimal?     @map("sentiment_score") @db.Decimal(5, 2)
+  metrics           Json         @default("{}")
+  windowStartedAt   DateTime     @map("window_started_at") @db.Timestamptz(6)
+  windowEndedAt     DateTime     @map("window_ended_at") @db.Timestamptz(6)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace         Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveChannel       LiveChannel  @relation(fields: [liveChannelId], references: [id], onDelete: Cascade)
+  liveSession       LiveSession? @relation(fields: [liveSessionId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, liveChannelId, windowEndedAt])
+  @@map("community_health_snapshots")
+}
+
+model LiveMessageEvidence {
+  workspaceId       String      @map("workspace_id") @db.Uuid
+  liveChatMessageId String      @map("live_chat_message_id") @db.Uuid
+  evidenceItemId    String      @map("evidence_item_id") @db.Uuid
+  purpose           String      @default("MODERATION_RECORD")
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace         Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  liveChatMessage   LiveChatMessage @relation(fields: [liveChatMessageId], references: [id], onDelete: Cascade)
+  evidenceItem      EvidenceItem @relation(fields: [evidenceItemId], references: [id], onDelete: Restrict)
+
+  @@id([liveChatMessageId, evidenceItemId])
+  @@index([workspaceId])
+  @@map("live_message_evidence")
 }
 
 model OutboxEvent {

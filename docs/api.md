@@ -13,6 +13,7 @@ The Fastify API is JSON-first, versioned under `/v1`, and documented by an OpenA
 - `X-Workspace-Id` chooses the active workspace; a personal workspace is resolved server-side if none is active.
 - Service calls use separate short-lived workload identity/service tokens.
 - Writes require `Idempotency-Key`; logs carry `X-Request-Id` or W3C trace context.
+- Live Guardian subscriptions use a separate short-lived, channel-scoped token. A browser can subscribe only to sessions/channels the resolved workspace role and live moderator assignment permit.
 
 ## Standards
 
@@ -52,6 +53,58 @@ The Fastify API is JSON-first, versioned under `/v1`, and documented by an OpenA
 | `GET` | `/jobs/:id` | requester or admin | Job state/safe failure detail. |
 | `GET` | `/audit-logs` | admin | Workspace audit query. |
 
+## Live Guardian endpoints
+
+All paths below are under `/v1`. Live ingestion is performed only by authenticated platform adapters/workloads, never by a browser client. Platform support and allowed action types are returned from the channel capability resource; a client must not assume that every platform supports timeout, mute, shadow mute, ban, or slow mode.
+
+| Method | Path | Required role | Purpose |
+| --- | --- | --- | --- |
+| `GET, POST` | `/live-channels` | viewer / admin | List protected live channels or configure an authorized channel. |
+| `GET, PATCH` | `/live-channels/:id` | assigned viewer / admin | Inspect/update channel state, capabilities, and settings. |
+| `GET, POST` | `/live-channels/:id/moderators` | assigned lead / admin | List/assign channel-scoped lead, moderator, or observer. |
+| `DELETE` | `/live-channels/:id/moderators/:userId` | assigned lead / admin | Remove a moderator assignment. |
+| `GET, POST` | `/live-channels/:id/moderation-policies` | assigned lead / admin | List/create versioned keyword, automation, threshold, escalation, and retention policies. |
+| `GET, PATCH` | `/live-moderation-policies/:id` | assigned lead / admin | Inspect or update a policy with optimistic versioning. |
+| `POST` | `/live-moderation-policies/:id/activate` | admin | Activate a reviewed policy version. |
+| `GET` | `/live-sessions` and `/live-sessions/:id` | assigned observer | List/inspect current and historical live sessions. |
+| `GET` | `/live-sessions/:id/messages` | assigned moderator | Cursor-query retained normalized messages; content access follows retention/evidence rules. |
+| `GET` | `/live-sessions/:id/findings` | assigned moderator | Query moderation signals, confidence, limitations, and related action. |
+| `GET, POST` | `/live-sessions/:id/moderation-actions` | assigned moderator | List or issue a human moderation action. `POST` is idempotent and returns `202` if provider work is needed. |
+| `POST` | `/live-moderation-actions/:id/approve` | assigned lead / admin | Approve a suggested action when policy requires human approval. |
+| `POST` | `/live-moderation-actions/:id/cancel` | assigned moderator | Cancel an unsubmitted proposed action. |
+| `POST` | `/live-moderation-actions/:id/reverse` | assigned lead / admin | Request permitted reversal/unban/restore action; provider support is checked. |
+| `GET` | `/live-incidents` and `/live-incidents/:id` | assigned observer | View live incident risk, evidence links, and ordered timeline. |
+| `POST` | `/live-incidents/:id/acknowledge` | assigned moderator | Record ownership/acknowledgement. |
+| `POST` | `/live-incidents/:id/resolve` | assigned lead / analyst | Close with an audited resolution reason. |
+| `GET` | `/live-channels/:id/community-health` | assigned observer | Read health/sentiment snapshots and coverage context. |
+| `GET` | `/live-moderator-appeals` | assigned moderator | Review appeals scoped to assigned channels. |
+| `POST` | `/live-moderator-appeals/:id/resolve` | assigned lead / analyst | Accept/reject an appeal and trigger allowed reversal path. |
+
+### Real-time subscription contract
+
+`GET /v1/realtime/live?token=<short-lived-subscription-token>` upgrades to WebSocket (or an equivalent authenticated server-sent event transport if a deployment requires it). The token contains workspace, permitted channel/session IDs, role, expiry, and audience; it is never a platform credential.
+
+Clients may receive `live.message.redacted.v1`, `live.finding.created.v1`, `live.action.updated.v1`, `live.incident.updated.v1`, `live.health.updated.v1`, and `live.coverage.updated.v1`. Message bodies are redacted unless the caller has the specific moderator/evidence capability. The gateway enforces bounded subscriptions, heartbeat, backpressure, reconnect cursor, and per-user connection limits.
+
+Example action command:
+
+```http
+POST /v1/live-sessions/5fa5f60a-6d2a-4a5a-8a39-1ed471f3a00f/moderation-actions
+Authorization: Bearer <clerk-session-token>
+X-Workspace-Id: 9a995a90-f49d-4fe0-b27f-fa2dfb45d987
+Idempotency-Key: 9c97e9d9-b0b8-48a1-b4c9-71399ca0a1c1
+Content-Type: application/json
+
+{
+  "actionType": "TIMEOUT",
+  "liveChatMessageId": "7bc16c83-8ba7-427a-887b-5037c4c1b146",
+  "reasonCode": "HARASSMENT",
+  "durationSeconds": 600
+}
+```
+
+The response contains the action state, policy/capability decision, and safe provider outcome reference. It does not expose platform tokens or sensitive raw message data.
+
 ## Operational endpoints
 
 | Method | Path | Access | Purpose |
@@ -61,6 +114,7 @@ The Fastify API is JSON-first, versioned under `/v1`, and documented by an OpenA
 | `GET` | `/metrics` | observability | Metrics endpoint. |
 | `POST` | `/webhooks/clerk` | Clerk signature | Sync user/org lifecycle. |
 | `POST` | `/webhooks/:provider` | provider signature | Receive platform/report updates. |
+| `POST` | `/webhooks/live/:provider` | provider signature + connection match | Receive authorized live-session/chat/moderation callbacks. |
 
 ## Command example
 
@@ -95,6 +149,6 @@ type DomainEvent<T> = {
 };
 ```
 
-Initial topics: `scan.requested.v1`, `source.collected.v1`, `evidence.captured.v1`, `analysis.requested.v1`, `detection.created.v1`, `detection.triaged.v1`, `case.opened.v1`, `enforcement.approved.v1`, `notification.requested.v1`.
+Initial topics: `scan.requested.v1`, `source.collected.v1`, `evidence.captured.v1`, `analysis.requested.v1`, `detection.created.v1`, `detection.triaged.v1`, `case.opened.v1`, `enforcement.approved.v1`, `notification.requested.v1`, `live.session.started.v1`, `live.message.received.v1`, `live.finding.created.v1`, `live.action.requested.v1`, `live.action.applied.v1`, `live.incident.opened.v1`, `live.appeal.opened.v1`, `community-health.updated.v1`.
 
 Define schemas in `packages/contracts`, validate them at runtime, and generate OpenAPI from the same source. Add only compatible fields within a version; version breaking semantic changes. Contract-test routes, event producers/consumers, and connector adapters in CI.
