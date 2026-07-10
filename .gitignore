@@ -1,0 +1,13 @@
+node_modules/
+.pnpm-store/
+.turbo/
+.next/
+dist/
+coverage/
+.env
+.env.local
+!.env.example
+*.log
+*.tsbuildinfo
+prisma/dev.db
+minio-data/

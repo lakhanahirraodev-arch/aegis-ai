@@ -1,0 +1,767 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// PostgreSQL extensions, RLS policies, pgvector indexes, and immutable-audit
+// triggers are applied through reviewed SQL migrations. See docs/database.md.
+
+enum WorkspacePlan {
+  FREE
+  CREATOR
+  PRO
+  BUSINESS
+  ENTERPRISE
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  ANALYST
+  REVIEWER
+  VIEWER
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+  REMOVED
+}
+
+enum CreatorProfileStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum IdentityReferenceKind {
+  HANDLE
+  DOMAIN
+  DISPLAY_NAME
+  LEGAL_NAME
+  IMAGE_REFERENCE
+  VOICE_REFERENCE
+  VIDEO_REFERENCE
+  TRADEMARK
+  KEYWORD
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum Platform {
+  YOUTUBE
+  INSTAGRAM
+  TIKTOK
+  FACEBOOK
+  X
+  REDDIT
+  DISCORD
+  TELEGRAM
+  LINKEDIN
+  WEB
+  NEWS
+  FORUM
+  OTHER
+}
+
+enum ConnectedAccountStatus {
+  PENDING
+  ACTIVE
+  REAUTH_REQUIRED
+  REVOKED
+  ERROR
+}
+
+enum MonitoringRuleType {
+  IMPERSONATION_SEARCH
+  CONTENT_MATCH
+  REPUTATION_MONITOR
+  BRAND_ABUSE_SEARCH
+  COMMUNITY_MODERATION
+  LIVE_STREAM_GUARDIAN
+  CUSTOM
+}
+
+enum MonitoringRuleStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum ScanRunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  PARTIAL
+  FAILED
+  CANCELLED
+}
+
+enum SourceItemStatus {
+  DISCOVERED
+  AVAILABLE
+  UNAVAILABLE
+  REMOVED
+  BLOCKED
+  ERROR
+}
+
+enum EvidenceKind {
+  PAGE_CAPTURE
+  IMAGE
+  VIDEO
+  AUDIO
+  TRANSCRIPT
+  METADATA
+  SCREENSHOT
+  ARCHIVE
+  REPORT
+  DERIVATIVE
+}
+
+enum EvidenceStatus {
+  PENDING
+  CAPTURED
+  QUARANTINED
+  VERIFIED
+  PURGED
+  ERROR
+}
+
+enum ThreatCategory {
+  DEEPFAKE
+  SYNTHETIC_MEDIA
+  IMPERSONATION
+  STOLEN_CONTENT
+  COPYRIGHT_INFRINGEMENT
+  DEFAMATION
+  MISINFORMATION
+  HARASSMENT
+  HATE_SPEECH
+  DOXXING
+  SCAM
+  PHISHING
+  COUNTERFEIT
+  TRADEMARK_ABUSE
+  COORDINATED_ATTACK
+  OTHER
+}
+
+enum ThreatClusterStatus {
+  OPEN
+  MONITORING
+  ESCALATED
+  RESOLVED
+  DISMISSED
+}
+
+enum DetectionStatus {
+  NEW
+  TRIAGED
+  CONFIRMED
+  DISMISSED
+  ESCALATED
+}
+
+enum DetectionSeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum CaseStatus {
+  OPEN
+  IN_REVIEW
+  WAITING_EXTERNAL
+  RESOLVED
+  CLOSED
+}
+
+enum CasePriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum CaseEvidencePurpose {
+  PRIMARY
+  CORROBORATING
+  CONTEXT
+  RESPONSE_ARTIFACT
+}
+
+enum EnforcementActionType {
+  PLATFORM_REPORT
+  TAKEDOWN_NOTICE
+  DMCA_NOTICE
+  TRADEMARK_REPORT
+  IMPERSONATION_REPORT
+  LEGAL_LETTER
+  PUBLIC_STATEMENT
+  LAW_ENFORCEMENT_REFERRAL
+  OTHER
+}
+
+enum EnforcementStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  SUBMITTED
+  ACKNOWLEDGED
+  ACTIONED
+  REJECTED
+  CANCELLED
+  FAILED
+}
+
+enum AgentType {
+  DISCOVERY
+  EVIDENCE
+  IDENTITY_MATCH
+  SYNTHETIC_MEDIA
+  CONTENT_SIMILARITY
+  ABUSE_RISK
+  THREAT_INTELLIGENCE
+  CASE_SYNTHESIS
+  RESPONSE_DRAFT
+  ANALYTICS
+  COMMUNITY
+}
+
+enum AgentRunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  BLOCKED
+}
+
+enum AgentVerdict {
+  POSITIVE
+  NEGATIVE
+  INCONCLUSIVE
+  ERROR
+}
+
+enum AgentReviewState {
+  PENDING
+  ACCEPTED
+  REJECTED
+  OVERRIDDEN
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  RETRYING
+  FAILED
+  CANCELLED
+  DEAD_LETTER
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+  WEBHOOK
+  SMS
+  SLACK
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  SUPPRESSED
+}
+
+model User {
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkUserId   String            @unique @map("clerk_user_id")
+  email         String?
+  displayName   String?           @map("display_name")
+  status        String            @default("active")
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  memberships   WorkspaceMember[]
+  assignedCases Case[]            @relation("CaseAssignee")
+  requestedEnforcementActions EnforcementAction[] @relation("EnforcementRequester")
+  approvedEnforcementActions  EnforcementAction[] @relation("EnforcementApprover")
+
+  @@map("users")
+}
+
+model Workspace {
+  id                  String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkOrganizationId String?                @unique @map("clerk_organization_id")
+  name                String
+  plan                WorkspacePlan          @default(CREATOR)
+  settings            Json                   @default("{}")
+  createdAt           DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+  members             WorkspaceMember[]
+  creatorProfiles     CreatorProfile[]
+  connectedAccounts   ConnectedAccount[]
+  monitoringRules     MonitoringRule[]
+  scanRuns            ScanRun[]
+  sourceItems         SourceItem[]
+  evidenceItems       EvidenceItem[]
+  threatClusters      ThreatCluster[]
+  detections          Detection[]
+  cases               Case[]
+  enforcementActions  EnforcementAction[]
+  agentRuns           AgentRun[]
+  agentFindings       AgentFinding[]
+  contentEmbeddings   ContentEmbedding[]
+  outboxEvents        OutboxEvent[]
+  jobRuns             JobRun[]
+  notificationDeliveries NotificationDelivery[]
+  caseEvidence        CaseEvidence[]
+  auditLogs           AuditLog[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  userId      String           @map("user_id") @db.Uuid
+  role        WorkspaceRole
+  status      MembershipStatus @default(ACTIVE)
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId, status])
+  @@map("workspace_members")
+}
+
+model CreatorProfile {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId          String               @map("workspace_id") @db.Uuid
+  displayName          String               @map("display_name")
+  legalNameEncrypted   String?              @map("legal_name_encrypted")
+  status               CreatorProfileStatus @default(ACTIVE)
+  riskPreferences      Json                 @default("{}") @map("risk_preferences")
+  createdAt            DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace            Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  identityReferences   IdentityReference[]
+  monitoringRules      MonitoringRule[]
+  threatClusters       ThreatCluster[]
+
+  @@index([workspaceId, status])
+  @@map("creator_profiles")
+}
+
+model IdentityReference {
+  id                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creatorProfileId    String                @map("creator_profile_id") @db.Uuid
+  kind                IdentityReferenceKind
+  valueEncrypted      String?               @map("value_encrypted")
+  valueNormalizedHash String                 @map("value_normalized_hash")
+  verificationStatus  VerificationStatus    @default(UNVERIFIED) @map("verification_status")
+  metadata            Json                  @default("{}")
+  createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+  creatorProfile      CreatorProfile        @relation(fields: [creatorProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorProfileId, kind, valueNormalizedHash])
+  @@index([kind, valueNormalizedHash])
+  @@map("identity_references")
+}
+
+model ConnectedAccount {
+  id                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId       String                 @map("workspace_id") @db.Uuid
+  platform          Platform
+  externalAccountId String                 @map("external_account_id")
+  displayHandle     String?                @map("display_handle")
+  secretReference   String                 @map("secret_reference")
+  scopes            String[]               @default([])
+  status            ConnectedAccountStatus @default(PENDING)
+  lastValidatedAt   DateTime?              @map("last_validated_at") @db.Timestamptz(6)
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace         Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, platform, externalAccountId])
+  @@index([workspaceId, status])
+  @@map("connected_accounts")
+}
+
+model MonitoringRule {
+  id               String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId      String               @map("workspace_id") @db.Uuid
+  creatorProfileId String?              @map("creator_profile_id") @db.Uuid
+  ruleType         MonitoringRuleType   @map("rule_type")
+  status           MonitoringRuleStatus @default(DRAFT)
+  schedule         String?
+  config           Json                 @default("{}")
+  version          Int                  @default(1)
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace        Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creatorProfile   CreatorProfile?      @relation(fields: [creatorProfileId], references: [id], onDelete: SetNull)
+  scanRuns         ScanRun[]
+
+  @@index([workspaceId, status])
+  @@map("monitoring_rules")
+}
+
+model ScanRun {
+  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId      String        @map("workspace_id") @db.Uuid
+  monitoringRuleId String        @map("monitoring_rule_id") @db.Uuid
+  status           ScanRunStatus @default(QUEUED)
+  idempotencyKey   String        @map("idempotency_key")
+  startedAt        DateTime?     @map("started_at") @db.Timestamptz(6)
+  completedAt      DateTime?     @map("completed_at") @db.Timestamptz(6)
+  summary          Json          @default("{}")
+  errorCode        String?       @map("error_code")
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace        Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  monitoringRule   MonitoringRule @relation(fields: [monitoringRuleId], references: [id], onDelete: Restrict)
+  sourceItems      SourceItem[]
+
+  @@unique([workspaceId, idempotencyKey])
+  @@index([workspaceId, status, createdAt])
+  @@map("scan_runs")
+}
+
+model SourceItem {
+  id                  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId         String           @map("workspace_id") @db.Uuid
+  scanRunId           String?          @map("scan_run_id") @db.Uuid
+  platform            Platform
+  externalId          String           @map("external_id")
+  canonicalUrl        String           @map("canonical_url")
+  authorExternalId    String?          @map("author_external_id")
+  publishedAt         DateTime?        @map("published_at") @db.Timestamptz(6)
+  discoveredAt        DateTime         @default(now()) @map("discovered_at") @db.Timestamptz(6)
+  rawPayloadObjectKey String?          @map("raw_payload_object_key")
+  normalizedContentHash String?        @map("normalized_content_hash")
+  status              SourceItemStatus @default(DISCOVERED)
+  metadata            Json             @default("{}")
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace           Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  scanRun             ScanRun?         @relation(fields: [scanRunId], references: [id], onDelete: SetNull)
+  evidenceItems       EvidenceItem[]
+  detections          Detection[]
+  embeddings          ContentEmbedding[]
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([workspaceId, platform, publishedAt])
+  @@index([workspaceId, canonicalUrl])
+  @@map("source_items")
+}
+
+model EvidenceItem {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId      String         @map("workspace_id") @db.Uuid
+  sourceItemId     String?        @map("source_item_id") @db.Uuid
+  parentEvidenceId String?        @map("parent_evidence_id") @db.Uuid
+  kind             EvidenceKind
+  status           EvidenceStatus @default(PENDING)
+  objectKey        String         @unique @map("object_key")
+  contentType      String?        @map("content_type")
+  byteSize         BigInt?        @map("byte_size")
+  sha256           String?        @map("sha256")
+  captureManifest  Json           @default("{}") @map("capture_manifest")
+  retentionUntil   DateTime?      @map("retention_until") @db.Timestamptz(6)
+  legalHold        Boolean        @default(false) @map("legal_hold")
+  capturedAt       DateTime?      @map("captured_at") @db.Timestamptz(6)
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace        Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sourceItem       SourceItem?    @relation(fields: [sourceItemId], references: [id], onDelete: SetNull)
+  parentEvidence   EvidenceItem?  @relation("EvidenceDerivatives", fields: [parentEvidenceId], references: [id], onDelete: Restrict)
+  derivatives      EvidenceItem[] @relation("EvidenceDerivatives")
+  caseEvidence     CaseEvidence[]
+  embeddings       ContentEmbedding[]
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, legalHold, retentionUntil])
+  @@index([sha256])
+  @@map("evidence_items")
+}
+
+model ThreatCluster {
+  id               String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId      String              @map("workspace_id") @db.Uuid
+  creatorProfileId String?             @map("creator_profile_id") @db.Uuid
+  category         ThreatCategory
+  status           ThreatClusterStatus @default(OPEN)
+  riskScore        Decimal             @default(0) @map("risk_score") @db.Decimal(5, 2)
+  riskBreakdown    Json                @default("{}") @map("risk_breakdown")
+  title            String
+  summary          String?
+  firstObservedAt  DateTime            @default(now()) @map("first_observed_at") @db.Timestamptz(6)
+  lastObservedAt   DateTime            @default(now()) @map("last_observed_at") @db.Timestamptz(6)
+  version          Int                 @default(1)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace        Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creatorProfile   CreatorProfile?     @relation(fields: [creatorProfileId], references: [id], onDelete: SetNull)
+  detections       Detection[]
+  cases            Case[]
+
+  @@index([workspaceId, status, riskScore])
+  @@index([workspaceId, category, lastObservedAt])
+  @@map("threat_clusters")
+}
+
+model Detection {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId     String            @map("workspace_id") @db.Uuid
+  sourceItemId    String            @map("source_item_id") @db.Uuid
+  threatClusterId String?           @map("threat_cluster_id") @db.Uuid
+  category        ThreatCategory
+  status          DetectionStatus   @default(NEW)
+  severity        DetectionSeverity @default(MEDIUM)
+  confidence      Decimal           @db.Decimal(5, 4)
+  rationale       String?
+  riskFactors     Json              @default("[]") @map("risk_factors")
+  detectedAt      DateTime          @default(now()) @map("detected_at") @db.Timestamptz(6)
+  triagedAt       DateTime?         @map("triaged_at") @db.Timestamptz(6)
+  version         Int               @default(1)
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace       Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sourceItem      SourceItem        @relation(fields: [sourceItemId], references: [id], onDelete: Restrict)
+  threatCluster   ThreatCluster?    @relation(fields: [threatClusterId], references: [id], onDelete: SetNull)
+  agentFindings   AgentFinding[]
+
+  @@index([workspaceId, status, severity, detectedAt])
+  @@index([workspaceId, sourceItemId])
+  @@map("detections")
+}
+
+model Case {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId     String       @map("workspace_id") @db.Uuid
+  threatClusterId String       @map("threat_cluster_id") @db.Uuid
+  assignedToId    String?      @map("assigned_to_id") @db.Uuid
+  status          CaseStatus   @default(OPEN)
+  priority        CasePriority @default(NORMAL)
+  title           String
+  summary         String?
+  version         Int          @default(1)
+  openedAt        DateTime     @default(now()) @map("opened_at") @db.Timestamptz(6)
+  resolvedAt      DateTime?    @map("resolved_at") @db.Timestamptz(6)
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  threatCluster   ThreatCluster @relation(fields: [threatClusterId], references: [id], onDelete: Restrict)
+  assignedTo      User?        @relation("CaseAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  evidence        CaseEvidence[]
+  enforcementActions EnforcementAction[]
+
+  @@index([workspaceId, status, priority, updatedAt])
+  @@index([assignedToId, status])
+  @@map("cases")
+}
+
+model CaseEvidence {
+  workspaceId    String              @map("workspace_id") @db.Uuid
+  caseId         String              @map("case_id") @db.Uuid
+  evidenceItemId String              @map("evidence_item_id") @db.Uuid
+  purpose        CaseEvidencePurpose @default(PRIMARY)
+  addedAt        DateTime            @default(now()) @map("added_at") @db.Timestamptz(6)
+  workspace      Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  case           Case                @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  evidenceItem   EvidenceItem        @relation(fields: [evidenceItemId], references: [id], onDelete: Restrict)
+
+  @@id([caseId, evidenceItemId])
+  @@index([workspaceId])
+  @@map("case_evidence")
+}
+
+model EnforcementAction {
+  id                    String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId           String                @map("workspace_id") @db.Uuid
+  caseId                String                @map("case_id") @db.Uuid
+  provider              String
+  actionType            EnforcementActionType @map("action_type")
+  status                EnforcementStatus     @default(DRAFT)
+  draftObjectKey        String?               @map("draft_object_key")
+  providerReference     String?               @map("provider_reference")
+  idempotencyKey        String                @map("idempotency_key")
+  requestedById         String?               @map("requested_by_id") @db.Uuid
+  approvedById          String?               @map("approved_by_id") @db.Uuid
+  approvedAt            DateTime?             @map("approved_at") @db.Timestamptz(6)
+  submittedAt           DateTime?             @map("submitted_at") @db.Timestamptz(6)
+  outcome               Json                  @default("{}")
+  createdAt             DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace             Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  case                  Case                  @relation(fields: [caseId], references: [id], onDelete: Restrict)
+  requestedBy           User?                 @relation("EnforcementRequester", fields: [requestedById], references: [id], onDelete: SetNull)
+  approvedBy            User?                 @relation("EnforcementApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, idempotencyKey])
+  @@index([caseId, status])
+  @@map("enforcement_actions")
+}
+
+model AgentRun {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId      String         @map("workspace_id") @db.Uuid
+  agentType        AgentType      @map("agent_type")
+  status           AgentRunStatus @default(QUEUED)
+  provider         String?
+  modelName        String?        @map("model_name")
+  modelVersion     String?        @map("model_version")
+  promptVersion    String?        @map("prompt_version")
+  policyVersion    String         @map("policy_version")
+  inputFingerprint String         @map("input_fingerprint")
+  outputObjectKey  String?        @map("output_object_key")
+  costUsd          Decimal?       @map("cost_usd") @db.Decimal(12, 6)
+  startedAt        DateTime?      @map("started_at") @db.Timestamptz(6)
+  completedAt      DateTime?      @map("completed_at") @db.Timestamptz(6)
+  failureCode      String?        @map("failure_code")
+  traceId          String?        @map("trace_id")
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace        Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  findings         AgentFinding[]
+
+  @@index([workspaceId, agentType, createdAt])
+  @@index([traceId])
+  @@map("agent_runs")
+}
+
+model AgentFinding {
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  agentRunId  String           @map("agent_run_id") @db.Uuid
+  detectionId String?          @map("detection_id") @db.Uuid
+  findingType String           @map("finding_type")
+  verdict     AgentVerdict
+  confidence  Decimal          @db.Decimal(5, 4)
+  rationale   String?
+  limitations Json             @default("[]")
+  evidenceIds String[]         @default([]) @map("evidence_ids") @db.Uuid
+  reviewState AgentReviewState @default(PENDING) @map("review_state")
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  agentRun    AgentRun         @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+  detection   Detection?       @relation(fields: [detectionId], references: [id], onDelete: SetNull)
+
+  @@index([detectionId])
+  @@index([workspaceId, createdAt])
+  @@map("agent_findings")
+}
+
+model ContentEmbedding {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId    String        @map("workspace_id") @db.Uuid
+  sourceItemId   String?       @map("source_item_id") @db.Uuid
+  evidenceItemId String?       @map("evidence_item_id") @db.Uuid
+  embeddingType  String        @map("embedding_type")
+  model          String
+  modelVersion   String        @map("model_version")
+  vector         Unsupported("vector")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sourceItem     SourceItem?   @relation(fields: [sourceItemId], references: [id], onDelete: Cascade)
+  evidenceItem   EvidenceItem? @relation(fields: [evidenceItemId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, embeddingType, modelVersion])
+  @@map("content_embeddings")
+}
+
+model OutboxEvent {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId   String    @map("workspace_id") @db.Uuid
+  topic         String
+  aggregateType String    @map("aggregate_type")
+  aggregateId   String    @map("aggregate_id") @db.Uuid
+  aggregateVersion Int    @map("aggregate_version")
+  payload       Json
+  correlationId String?   @map("correlation_id")
+  occurredAt    DateTime  @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  publishedAt   DateTime? @map("published_at") @db.Timestamptz(6)
+  attempts      Int       @default(0)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([publishedAt, occurredAt])
+  @@index([workspaceId, topic, occurredAt])
+  @@map("outbox_events")
+}
+
+model JobRun {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId    String    @map("workspace_id") @db.Uuid
+  jobType        String    @map("job_type")
+  queueName      String    @map("queue_name")
+  idempotencyKey String    @map("idempotency_key")
+  status         JobStatus @default(QUEUED)
+  payloadHash    String    @map("payload_hash")
+  traceId        String?   @map("trace_id")
+  attempts       Int       @default(0)
+  maxAttempts    Int       @default(5) @map("max_attempts")
+  startedAt      DateTime? @map("started_at") @db.Timestamptz(6)
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz(6)
+  failureCode    String?   @map("failure_code")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, jobType, idempotencyKey])
+  @@index([queueName, status, createdAt])
+  @@map("job_runs")
+}
+
+model NotificationDelivery {
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String             @map("workspace_id") @db.Uuid
+  channel     NotificationChannel
+  template    String
+  status      NotificationStatus @default(PENDING)
+  recipientHash String            @map("recipient_hash")
+  providerReference String?       @map("provider_reference")
+  errorCode   String?             @map("error_code")
+  sentAt      DateTime?          @map("sent_at") @db.Timestamptz(6)
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status, createdAt])
+  @@map("notification_deliveries")
+}
+
+model AuditLog {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId   String    @map("workspace_id") @db.Uuid
+  actorType     String    @map("actor_type")
+  actorId       String?   @map("actor_id")
+  action        String
+  resourceType  String    @map("resource_type")
+  resourceId    String?   @map("resource_id")
+  outcome       String
+  correlationId String?   @map("correlation_id")
+  ipHash        String?   @map("ip_hash")
+  metadata      Json      @default("{}")
+  occurredAt    DateTime  @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, occurredAt])
+  @@index([workspaceId, resourceType, resourceId])
+  @@map("audit_logs")
+}
