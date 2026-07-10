@@ -21,9 +21,10 @@ enum WorkspacePlan {
 enum WorkspaceRole {
   OWNER
   ADMIN
-  ANALYST
+  MANAGER
   MODERATOR
-  REVIEWER
+  CREATOR
+  ANALYST
   VIEWER
 }
 

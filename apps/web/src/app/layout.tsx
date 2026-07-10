@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import React from "react";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata = {
   title: "Aegis AI - Trust & Safety OS",
@@ -8,10 +9,12 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <main className="min-h-screen bg-background text-foreground">{children}</main>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className="antialiased">
+          <main className="min-h-screen bg-slate-950 text-slate-100">{children}</main>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

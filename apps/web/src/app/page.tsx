@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Shield, FileText, Search, Activity, Lock, Users, Clock } from "@aegis/ui";
 
 export default function HomePage() {
@@ -42,9 +44,28 @@ export default function HomePage() {
             </p>
           </div>
           <div className="mt-6 md:mt-0 flex space-x-3 justify-center">
-            <div className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-sm text-slate-300 font-semibold shadow-inner">
-              Workspace ID: Scaffold Mode
-            </div>
+            <SignedIn>
+              <Link
+                href="/dashboard"
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-lg hover:shadow-indigo-500/20 transition duration-150"
+              >
+                Go to Dashboard
+              </Link>
+            </SignedIn>
+            <SignedOut>
+              <Link
+                href="/sign-in"
+                className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 rounded-lg text-sm font-semibold transition duration-150"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/sign-up"
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-lg hover:shadow-indigo-500/20 transition duration-150"
+              >
+                Register Workspace
+              </Link>
+            </SignedOut>
           </div>
         </section>
 

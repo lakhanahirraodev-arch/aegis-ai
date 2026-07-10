@@ -4,7 +4,7 @@ import path from "path";
 // Load environment variables from root or local workspace
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
-import fastify from "fastify";
+import fastify, { FastifyRequest, FastifyReply } from "fastify";
 import cors from "@fastify/cors";
 import { validateEnv } from "@aegis/config";
 
@@ -22,6 +22,18 @@ try {
   };
 }
 
+import authPlugin from "./plugins/auth";
+import permissionsPlugin from "./plugins/permissions";
+import featureFlagsPlugin from "./plugins/featureFlags";
+import auditPlugin from "./plugins/audit";
+import clerkWebhookRoutes from "./routes/webhooks/clerk";
+
+declare module "fastify" {
+  interface FastifyInstance {
+    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+  }
+}
+
 const server = fastify({
   logger: {
     level: env.NODE_ENV === "development" ? "debug" : "info",
@@ -31,6 +43,15 @@ const server = fastify({
 server.register(cors, {
   origin: "*",
 });
+
+// Register future-proof authorization plugins
+server.register(authPlugin);
+server.register(permissionsPlugin);
+server.register(featureFlagsPlugin);
+server.register(auditPlugin);
+
+// Register Clerk synchronization webhook routes
+server.register(clerkWebhookRoutes);
 
 // Health check endpoints as documented in docs/api.md
 server.get("/healthz", async () => {
@@ -42,15 +63,32 @@ server.get("/readyz", async () => {
   return { status: "READY" };
 });
 
-// Me endpoint contract verification path
-server.get("/v1/me", async () => {
-  return {
-    id: "scaffold-user-id",
-    displayName: "Aegis OS Operator",
-    email: "operator@aegis.example",
-    capabilities: ["READ_AUDIT", "MANAGE_WORKSPACE"],
-  };
-});
+// Me endpoint protected by authentication and capability-based RBAC
+server.get(
+  "/v1/me",
+  {
+    preValidation: [
+      async (req, rep) => await server.authenticate(req, rep),
+      async (req, rep) => await server.requirePermission("VIEW_DASHBOARD")(req, rep),
+    ],
+  },
+  async (request) => {
+    // Log successful access to audit log
+    await request.logAudit({
+      action: "ACCESS_ME",
+      resourceType: "USER",
+      resourceId: request.actor.id,
+      outcome: "SUCCESS",
+    });
+
+    return {
+      id: request.actor.id,
+      type: request.actor.type,
+      workspaceId: request.actor.workspaceId,
+      role: request.workspaceRole,
+    };
+  },
+);
 
 const start = async () => {
   try {

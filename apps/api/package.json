@@ -9,8 +9,11 @@
   },
   "dependencies": {
     "fastify": "^5.1.0",
+    "fastify-plugin": "^5.0.1",
     "dotenv": "^16.4.7",
     "pino": "^9.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.1.0",
     "@fastify/cors": "^10.0.1",
     "@aegis/config": "workspace:*",
     "@aegis/contracts": "workspace:*",
@@ -18,6 +21,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
+    "@types/jsonwebtoken": "^9.0.7",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
