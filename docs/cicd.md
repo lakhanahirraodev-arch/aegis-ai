@@ -16,13 +16,13 @@ flowchart LR
   PREVIEW --> REVIEW["Required code + policy review"]
 ```
 
-| Stage | Required checks |
-| --- | --- |
-| Validate | formatting, lint, strict typecheck, dependency graph/boundary rules, generated contract consistency. |
-| Test | unit/component tests, disposable integration stack, API/event contract compatibility, focused browser tests. |
-| Secure | secret detection, CodeQL/SAST, dependency/license scan, container scan, IaC scan, unsafe log pattern checks. |
-| Build | reproducible production image, SBOM, provenance/attestation, image signing, no mutable tag as release identity. |
-| Preview | deploy eligible changes with sanitized config, run smoke/accessibility/critical-flow tests, destroy after review. |
+| Stage    | Required checks                                                                                                   |
+| -------- | ----------------------------------------------------------------------------------------------------------------- |
+| Validate | formatting, lint, strict typecheck, dependency graph/boundary rules, generated contract consistency.              |
+| Test     | unit/component tests, disposable integration stack, API/event contract compatibility, focused browser tests.      |
+| Secure   | secret detection, CodeQL/SAST, dependency/license scan, container scan, IaC scan, unsafe log pattern checks.      |
+| Build    | reproducible production image, SBOM, provenance/attestation, image signing, no mutable tag as release identity.   |
+| Preview  | deploy eligible changes with sanitized config, run smoke/accessibility/critical-flow tests, destroy after review. |
 
 Protected `main` requires successful checks, review, code-owner approval for sensitive paths, and no unresolved security exceptions. Dependabot/Renovate-style upgrades are grouped, tested, and expedited for critical fixes.
 

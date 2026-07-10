@@ -5,7 +5,7 @@
 - TypeScript is strict. Avoid `any`, unsafe type assertions, unbounded `unknown` propagation, and implicit nullable states.
 - Runtime data at a process/API/event/provider boundary is validated with a schema. TypeScript types alone are not validation.
 - Use formatting and lint rules as CI-enforced standards; no manual style debates in review.
-- Keep functions cohesive, name effects explicitly, and prefer simple code over framework abstraction. Document the *why* for security, policy, or non-obvious reliability decisions.
+- Keep functions cohesive, name effects explicitly, and prefer simple code over framework abstraction. Document the _why_ for security, policy, or non-obvious reliability decisions.
 
 ## Module layout and dependencies
 

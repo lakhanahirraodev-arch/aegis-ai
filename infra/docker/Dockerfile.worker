@@ -1,0 +1,15 @@
+FROM node:22-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+WORKDIR /app
+COPY . .
+RUN pnpm install
+RUN pnpm --filter @aegis/database prisma generate
+RUN pnpm --filter @aegis/worker build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+COPY --from=base /app /app
+EXPOSE 4001
+CMD ["pnpm", "--filter", "@aegis/worker", "start"]

@@ -6,17 +6,17 @@ Trust & safety software must prove more than “the endpoint returned 200.” Ae
 
 ## Test layers
 
-| Layer | Scope | Runs | Examples |
-| --- | --- | --- | --- |
-| Static | types, format, lint, dependency boundaries, secret patterns | every commit | strict TS, import rules, formatting, SBOM. |
-| Unit | pure domain/policy functions | every commit | risk-breakdown calculation, action state transition, cursor encoding. |
-| Component | module/application service with fakes | every commit | command writes aggregate + outbox atomically. |
-| Integration | real PostgreSQL/Redis/object-store emulator | pull request | RLS denial, migration, idempotent job retry, signed access audit. |
-| Contract | HTTP/event/provider schemas | pull request and provider change | OpenAPI compatibility, event consumer against producer fixture. |
-| End-to-end | browser → API → worker happy/negative paths | staging candidate | triage to reviewed draft; no automatic external action. |
-| Performance/resilience | capacity and injected fault behavior | scheduled/release | queue backlog, provider timeout, DB failover, restore drill. |
-| Security | SAST, dependency/container/IaC scanning, DAST/pentest | CI/scheduled/release | SSRF block, auth bypass, sensitive-log regression. |
-| AI evaluation | benchmark, safety, calibration, regression | every model/prompt/policy change | false-positive rate, grounding, jailbreak/injection resistance. |
+| Layer                  | Scope                                                       | Runs                             | Examples                                                              |
+| ---------------------- | ----------------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------- |
+| Static                 | types, format, lint, dependency boundaries, secret patterns | every commit                     | strict TS, import rules, formatting, SBOM.                            |
+| Unit                   | pure domain/policy functions                                | every commit                     | risk-breakdown calculation, action state transition, cursor encoding. |
+| Component              | module/application service with fakes                       | every commit                     | command writes aggregate + outbox atomically.                         |
+| Integration            | real PostgreSQL/Redis/object-store emulator                 | pull request                     | RLS denial, migration, idempotent job retry, signed access audit.     |
+| Contract               | HTTP/event/provider schemas                                 | pull request and provider change | OpenAPI compatibility, event consumer against producer fixture.       |
+| End-to-end             | browser → API → worker happy/negative paths                 | staging candidate                | triage to reviewed draft; no automatic external action.               |
+| Performance/resilience | capacity and injected fault behavior                        | scheduled/release                | queue backlog, provider timeout, DB failover, restore drill.          |
+| Security               | SAST, dependency/container/IaC scanning, DAST/pentest       | CI/scheduled/release             | SSRF block, auth bypass, sensitive-log regression.                    |
+| AI evaluation          | benchmark, safety, calibration, regression                  | every model/prompt/policy change | false-positive rate, grounding, jailbreak/injection resistance.       |
 
 ## Required invariants
 
@@ -51,12 +51,12 @@ Before any model, prompt, tool, threshold, or provider change reaches production
 
 ## Release gates
 
-| Change | Minimum gate |
-| --- | --- |
-| UI-only | static, component, accessibility, visual regression where applicable. |
-| API/domain | unit, integration, contract, authorization negative tests. |
-| Schema/RLS | migration/rehearsal, RLS integration, query review, rollback plan. |
+| Change             | Minimum gate                                                           |
+| ------------------ | ---------------------------------------------------------------------- |
+| UI-only            | static, component, accessibility, visual regression where applicable.  |
+| API/domain         | unit, integration, contract, authorization negative tests.             |
+| Schema/RLS         | migration/rehearsal, RLS integration, query review, rollback plan.     |
 | Connector/evidence | SSRF/malware/size tests, sandbox integration, idempotency/retry tests. |
-| AI/policy | evaluation suite, safety review, shadow rollout, feature flag. |
-| Enforcement | separation-of-duties, approval-state, provider sandbox, audit tests. |
-| Infrastructure | IaC policy/plan, security scan, staging smoke, rollback rehearsal. |
+| AI/policy          | evaluation suite, safety review, shadow rollout, feature flag.         |
+| Enforcement        | separation-of-duties, approval-state, provider sandbox, audit tests.   |
+| Infrastructure     | IaC policy/plan, security scan, staging smoke, rollback rehearsal.     |

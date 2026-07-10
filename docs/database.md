@@ -45,34 +45,34 @@ erDiagram
 
 ## Core protection tables
 
-| Table | Key columns | Responsibility |
-| --- | --- | --- |
-| `users`, `workspaces`, `workspace_members` | Clerk identifiers, `workspace_id`, role, status | Application identity mapping and workspace boundary; no passwords. |
-| `creator_profiles`, `identity_references` | protected profile, encrypted/hash identity reference | Creator/brand identity, aliases, domains, reference assets. |
-| `connected_accounts` | platform account ID, secret reference, scopes, state | Authorized platform connection; secret value stays in secret manager. |
-| `monitoring_rules`, `scan_runs` | type, schedule, config, idempotency/status | Bounded background monitoring. |
-| `source_items`, `evidence_items` | source reference, object key, SHA-256, hold/retention | Normalized content discovery and immutable evidence chain. |
-| `detections`, `threat_clusters`, `cases` | category, risk, review/case state | Evidence-backed asynchronous Trust & Safety workflow. |
-| `enforcement_actions` | draft, approval, provider state, idempotency | Human-approved external reports and response actions. |
-| `agent_runs`, `agent_findings` | provider/model/policy, fingerprint, verdict | Reproducible agent analysis and reviewer outcome. |
-| `content_embeddings` | model/version, `vector`, access scope | Semantic/content matching; pgvector index added by SQL migration. |
-| `outbox_events`, `job_runs`, `notification_deliveries`, `audit_logs` | event/job/delivery/audit metadata | Reliability, traceability, and security operations. |
+| Table                                                                | Key columns                                           | Responsibility                                                        |
+| -------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------------- |
+| `users`, `workspaces`, `workspace_members`                           | Clerk identifiers, `workspace_id`, role, status       | Application identity mapping and workspace boundary; no passwords.    |
+| `creator_profiles`, `identity_references`                            | protected profile, encrypted/hash identity reference  | Creator/brand identity, aliases, domains, reference assets.           |
+| `connected_accounts`                                                 | platform account ID, secret reference, scopes, state  | Authorized platform connection; secret value stays in secret manager. |
+| `monitoring_rules`, `scan_runs`                                      | type, schedule, config, idempotency/status            | Bounded background monitoring.                                        |
+| `source_items`, `evidence_items`                                     | source reference, object key, SHA-256, hold/retention | Normalized content discovery and immutable evidence chain.            |
+| `detections`, `threat_clusters`, `cases`                             | category, risk, review/case state                     | Evidence-backed asynchronous Trust & Safety workflow.                 |
+| `enforcement_actions`                                                | draft, approval, provider state, idempotency          | Human-approved external reports and response actions.                 |
+| `agent_runs`, `agent_findings`                                       | provider/model/policy, fingerprint, verdict           | Reproducible agent analysis and reviewer outcome.                     |
+| `content_embeddings`                                                 | model/version, `vector`, access scope                 | Semantic/content matching; pgvector index added by SQL migration.     |
+| `outbox_events`, `job_runs`, `notification_deliveries`, `audit_logs` | event/job/delivery/audit metadata                     | Reliability, traceability, and security operations.                   |
 
 ## Live Guardian tables
 
-| Table | Key columns | Responsibility |
-| --- | --- | --- |
-| `live_channels` | workspace, creator/account, platform channel, capabilities | A protected channel/community and connector-supported moderation capabilities. |
-| `live_moderator_assignments` | workspace, channel, user, moderator role | Channel-scoped lead/moderator/observer assignment. |
-| `live_moderation_policies` | workspace/channel, version, config, state | Versioned keyword, threshold, automation, escalation, language, and retention policy. |
-| `live_sessions` | channel, external session ID, live state/times | One stream/event lifecycle. |
-| `live_chat_messages` | session, platform message ID, encrypted content, author hash, expiry | High-volume normalized chat event record; short-lived by default. |
-| `live_moderation_findings` | session/message, category, severity, confidence, policy version | Typed toxicity, hate, scam, bot, raid, threat, child-safety, NSFW, self-harm, and sentiment signals. |
-| `live_moderation_actions` | finding/message, action type/source/status, provider reference | Proposed, human-issued, or policy-authorized warn/reply/delete/timeout/mute/ban/slow-mode action. |
-| `live_moderator_appeals` | action, appellant hash, encrypted reason, reviewer outcome | Auditable review and reversal path for moderated users. |
-| `live_incidents`, `live_incident_timeline_entries` | session, severity/state, ordered timeline | Raid/abuse/crisis grouping and live incident timeline. |
-| `community_health_snapshots` | channel/session, score, sentiment, metric window | Time-series community-health and sentiment outcomes. |
-| `live_message_evidence` | message/evidence link, purpose | Promotes material live messages/artifacts into the Evidence Center without retaining all chat forever. |
+| Table                                              | Key columns                                                          | Responsibility                                                                                         |
+| -------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `live_channels`                                    | workspace, creator/account, platform channel, capabilities           | A protected channel/community and connector-supported moderation capabilities.                         |
+| `live_moderator_assignments`                       | workspace, channel, user, moderator role                             | Channel-scoped lead/moderator/observer assignment.                                                     |
+| `live_moderation_policies`                         | workspace/channel, version, config, state                            | Versioned keyword, threshold, automation, escalation, language, and retention policy.                  |
+| `live_sessions`                                    | channel, external session ID, live state/times                       | One stream/event lifecycle.                                                                            |
+| `live_chat_messages`                               | session, platform message ID, encrypted content, author hash, expiry | High-volume normalized chat event record; short-lived by default.                                      |
+| `live_moderation_findings`                         | session/message, category, severity, confidence, policy version      | Typed toxicity, hate, scam, bot, raid, threat, child-safety, NSFW, self-harm, and sentiment signals.   |
+| `live_moderation_actions`                          | finding/message, action type/source/status, provider reference       | Proposed, human-issued, or policy-authorized warn/reply/delete/timeout/mute/ban/slow-mode action.      |
+| `live_moderator_appeals`                           | action, appellant hash, encrypted reason, reviewer outcome           | Auditable review and reversal path for moderated users.                                                |
+| `live_incidents`, `live_incident_timeline_entries` | session, severity/state, ordered timeline                            | Raid/abuse/crisis grouping and live incident timeline.                                                 |
+| `community_health_snapshots`                       | channel/session, score, sentiment, metric window                     | Time-series community-health and sentiment outcomes.                                                   |
+| `live_message_evidence`                            | message/evidence link, purpose                                       | Promotes material live messages/artifacts into the Evidence Center without retaining all chat forever. |
 
 ## Live Guardian data lifecycle
 
@@ -84,16 +84,16 @@ erDiagram
 
 ## Enum vocabulary
 
-| Enum | Values / intent |
-| --- | --- |
-| `WorkspaceRole` | `OWNER`, `ADMIN`, `ANALYST`, `MODERATOR`, `REVIEWER`, `VIEWER`. |
-| `Platform` | Core social/community sources including `YOUTUBE`, `TWITCH`, `KICK`, `INSTAGRAM`, `TIKTOK`, and `DISCORD`. |
-| `LiveModerationCategory` | toxicity, hate speech, spam, scam link, bot activity, raid, harassment, threat, child safety, NSFW, self-harm, keyword, sentiment, other. |
-| `LiveModerationActionType` | warn, reply, delete message, timeout, mute, shadow mute, ban, enable/update slow mode, notify moderator. |
-| `LiveModerationActionSource` | policy automation, AI assistant, human moderator. |
-| `LiveModerationActionStatus` | suggested, pending approval, queued, applied, failed, cancelled, reversed. |
-| `LiveAppealStatus` | open, in review, accepted, rejected, closed. |
-| `LiveIncidentStatus` | open, acknowledged, mitigating, resolved, dismissed. |
+| Enum                         | Values / intent                                                                                                                           |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `WorkspaceRole`              | `OWNER`, `ADMIN`, `ANALYST`, `MODERATOR`, `REVIEWER`, `VIEWER`.                                                                           |
+| `Platform`                   | Core social/community sources including `YOUTUBE`, `TWITCH`, `KICK`, `INSTAGRAM`, `TIKTOK`, and `DISCORD`.                                |
+| `LiveModerationCategory`     | toxicity, hate speech, spam, scam link, bot activity, raid, harassment, threat, child safety, NSFW, self-harm, keyword, sentiment, other. |
+| `LiveModerationActionType`   | warn, reply, delete message, timeout, mute, shadow mute, ban, enable/update slow mode, notify moderator.                                  |
+| `LiveModerationActionSource` | policy automation, AI assistant, human moderator.                                                                                         |
+| `LiveModerationActionStatus` | suggested, pending approval, queued, applied, failed, cancelled, reversed.                                                                |
+| `LiveAppealStatus`           | open, in review, accepted, rejected, closed.                                                                                              |
+| `LiveIncidentStatus`         | open, acknowledged, mitigating, resolved, dismissed.                                                                                      |
 
 ## Prisma and PostgreSQL notes
 

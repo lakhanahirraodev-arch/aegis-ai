@@ -70,16 +70,16 @@ flowchart TB
 
 The first production deployment remains a modular monolith for core business workflows, with four independently deployed workloads:
 
-| Unit | Owns | May depend on |
-| --- | --- | --- |
-| `apps/web` | creator, analyst, and moderator experience; real-time presentation | `ui`, `contracts`, `config` |
-| `apps/api` | HTTP boundary, authorization, domain commands/queries, OpenAPI | `contracts`, `database`, `ai-contracts`, `config` |
-| `apps/worker` | scans, evidence capture, crawling, async agents, reporting/delivery jobs | `contracts`, `database`, `ai-contracts`, `config` |
-| `apps/live-guardian` | normalized live-event ingestion, low-latency policy evaluation, moderator presence, real-time UI fan-out | `contracts`, `database`, `ai-contracts`, `config` |
-| `packages/database` | Prisma schema, migrations, database access convention | `config` |
-| `packages/contracts` | versioned DTOs, events, errors, moderation action schemas | no application package |
-| `packages/ai-contracts` | agent I/O, evidence/provenance, moderation policy-gate contracts | `contracts` |
-| `packages/ui` | design tokens and presentational primitives | `config` |
+| Unit                    | Owns                                                                                                     | May depend on                                     |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `apps/web`              | creator, analyst, and moderator experience; real-time presentation                                       | `ui`, `contracts`, `config`                       |
+| `apps/api`              | HTTP boundary, authorization, domain commands/queries, OpenAPI                                           | `contracts`, `database`, `ai-contracts`, `config` |
+| `apps/worker`           | scans, evidence capture, crawling, async agents, reporting/delivery jobs                                 | `contracts`, `database`, `ai-contracts`, `config` |
+| `apps/live-guardian`    | normalized live-event ingestion, low-latency policy evaluation, moderator presence, real-time UI fan-out | `contracts`, `database`, `ai-contracts`, `config` |
+| `packages/database`     | Prisma schema, migrations, database access convention                                                    | `config`                                          |
+| `packages/contracts`    | versioned DTOs, events, errors, moderation action schemas                                                | no application package                            |
+| `packages/ai-contracts` | agent I/O, evidence/provenance, moderation policy-gate contracts                                         | `contracts`                                       |
+| `packages/ui`           | design tokens and presentational primitives                                                              | `config`                                          |
 
 Apps never import another app. `apps/web` never accesses PostgreSQL directly. The Live Guardian gateway has a separate deployment and scaling profile because a slow capture, model, or queue must not block a live-chat moderation decision.
 

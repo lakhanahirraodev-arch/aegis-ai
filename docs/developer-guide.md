@@ -17,7 +17,8 @@ This is an architecture-first monorepo. The folders, contracts, database model, 
 cp .env.example .env
 docker compose up -d postgres redis minio
 pnpm install
-pnpm --filter @aegis/database prisma:migrate
+pnpm --filter @aegis/database db:generate
+pnpm --filter @aegis/database db:migrate
 pnpm dev
 ```
 
@@ -25,16 +26,16 @@ These are the Phase 1 operational targets; package manifests and application cod
 
 ## Repository navigation
 
-| Location | Purpose | Dependency rule |
-| --- | --- | --- |
-| `apps/web` | Next.js presentation and Clerk UI integration | Uses API/contracts; never Prisma or worker code. |
-| `apps/api` | Fastify routes, authorization, domain commands/queries | Does not import another app. |
-| `apps/worker` | Queue consumers, collection, evidence, analysis, delivery | Does not expose public HTTP business endpoints. |
-| `packages/contracts` | Versioned DTOs, event schemas, errors | No application-package imports. |
-| `packages/ai-contracts` | Agent inputs/outputs and policy-gate contracts | Depends only on contracts. |
-| `packages/database` | Prisma schema, reviewed migrations, scoped data access | No UI or provider SDKs. |
-| `packages/ui` | Presentational design system | No auth/domain/data dependencies. |
-| `packages/config` | Shared tooling and typed configuration | No runtime secrets. |
+| Location                | Purpose                                                   | Dependency rule                                  |
+| ----------------------- | --------------------------------------------------------- | ------------------------------------------------ |
+| `apps/web`              | Next.js presentation and Clerk UI integration             | Uses API/contracts; never Prisma or worker code. |
+| `apps/api`              | Fastify routes, authorization, domain commands/queries    | Does not import another app.                     |
+| `apps/worker`           | Queue consumers, collection, evidence, analysis, delivery | Does not expose public HTTP business endpoints.  |
+| `packages/contracts`    | Versioned DTOs, event schemas, errors                     | No application-package imports.                  |
+| `packages/ai-contracts` | Agent inputs/outputs and policy-gate contracts            | Depends only on contracts.                       |
+| `packages/database`     | Prisma schema, reviewed migrations, scoped data access    | No UI or provider SDKs.                          |
+| `packages/ui`           | Presentational design system                              | No auth/domain/data dependencies.                |
+| `packages/config`       | Shared tooling and typed configuration                    | No runtime secrets.                              |
 
 ## How to add a domain capability
 
@@ -50,12 +51,12 @@ These are the Phase 1 operational targets; package manifests and application cod
 
 Use typed per-app environment parsing at startup. Fail fast for missing required production configuration. Classify every new variable:
 
-| Class | Example | Rule |
-| --- | --- | --- |
-| Public build-time | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Safe for client bundle only after deliberate review. |
-| Runtime non-secret | `REDIS_URL`, feature-flag environment | Runtime injection; document default/owner. |
-| Secret | `CLERK_SECRET_KEY`, provider key | Secret manager only; never log or commit. |
-| Reference | `secret://…`, KMS key ARN | May live in config only when it grants no secret value. |
+| Class              | Example                               | Rule                                                    |
+| ------------------ | ------------------------------------- | ------------------------------------------------------- |
+| Public build-time  | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`   | Safe for client bundle only after deliberate review.    |
+| Runtime non-secret | `REDIS_URL`, feature-flag environment | Runtime injection; document default/owner.              |
+| Secret             | `CLERK_SECRET_KEY`, provider key      | Secret manager only; never log or commit.               |
+| Reference          | `secret://…`, KMS key ARN             | May live in config only when it grants no secret value. |
 
 Every external provider has a sandbox/development configuration, timeouts, rate limits, failure policy, and owner. Development cannot silently call a production moderation/reporting endpoint.
 

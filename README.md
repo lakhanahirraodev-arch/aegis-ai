@@ -33,18 +33,18 @@ The detailed design is in the [architecture guide](docs/architecture.md), [servi
 
 ## Technology choices
 
-| Concern | Choice |
-| --- | --- |
-| Web | Next.js 15, React 19, TypeScript, Tailwind CSS, shadcn/ui |
-| API | Fastify, TypeScript, OpenAPI |
-| Identity | Clerk (users, organizations, session tokens) |
-| Persistence | PostgreSQL 16, Prisma, pgvector |
-| Async processing | Redis, BullMQ, transactional outbox, dedicated worker pools |
-| AI | Provider-agnostic model gateway, OpenAI, Gemini, Claude adapters |
-| Local infrastructure | Docker Compose with PostgreSQL/pgvector, Redis, and MinIO |
+| Concern                   | Choice                                                                |
+| ------------------------- | --------------------------------------------------------------------- |
+| Web                       | Next.js 15, React 19, TypeScript, Tailwind CSS, shadcn/ui             |
+| API                       | Fastify, TypeScript, OpenAPI                                          |
+| Identity                  | Clerk (users, organizations, session tokens)                          |
+| Persistence               | PostgreSQL 16, Prisma, pgvector                                       |
+| Async processing          | Redis, BullMQ, transactional outbox, dedicated worker pools           |
+| AI                        | Provider-agnostic model gateway, OpenAI, Gemini, Claude adapters      |
+| Local infrastructure      | Docker Compose with PostgreSQL/pgvector, Redis, and MinIO             |
 | Production infrastructure | Cloudflare, AWS ECS/Fargate, S3, KMS/Secrets Manager, Neon PostgreSQL |
-| Monorepo | pnpm workspaces and Turborepo |
-| CI/CD | GitHub Actions, OIDC, signed images, SBOM/provenance |
+| Monorepo                  | pnpm workspaces and Turborepo                                         |
+| CI/CD                     | GitHub Actions, OIDC, signed images, SBOM/provenance                  |
 
 ## Repository layout
 

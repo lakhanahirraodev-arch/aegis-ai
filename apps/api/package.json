@@ -1,0 +1,24 @@
+{
+  "name": "@aegis/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "fastify": "^5.1.0",
+    "dotenv": "^16.4.7",
+    "pino": "^9.5.0",
+    "@fastify/cors": "^10.0.1",
+    "@aegis/config": "workspace:*",
+    "@aegis/contracts": "workspace:*",
+    "@aegis/database": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

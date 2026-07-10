@@ -38,38 +38,38 @@ flowchart TB
 
 ## Compute model
 
-| Workload | Runtime | Scaling signal | Network / permissions |
-| --- | --- | --- | --- |
-| Web | Stateless ECS service | requests, CPU/memory | No direct database access; API-only credentials. |
-| API | Stateless ECS service | requests, p95 latency, CPU | Database, Redis, secret reads; no unrestricted external crawling. |
-| Outbox publisher | API sidecar or dedicated small worker | unpublished outbox age | Redis publish, database write/read. |
-| Collection | Isolated ECS worker pool | queue depth, provider quota | Restricted internet egress; no user session access. |
-| Evidence/media | Isolated ECS worker pool; GPU capacity only if justified | queue depth, processing time | S3 scoped grants, scanning tools, restricted egress. |
-| Analysis | Separate worker pool | queue depth, model budget | model gateway/provider access, limited evidence grants. |
-| Notification/response | Separate worker pool | pending deliveries | approved provider endpoints only. |
+| Workload              | Runtime                                                  | Scaling signal               | Network / permissions                                             |
+| --------------------- | -------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------- |
+| Web                   | Stateless ECS service                                    | requests, CPU/memory         | No direct database access; API-only credentials.                  |
+| API                   | Stateless ECS service                                    | requests, p95 latency, CPU   | Database, Redis, secret reads; no unrestricted external crawling. |
+| Outbox publisher      | API sidecar or dedicated small worker                    | unpublished outbox age       | Redis publish, database write/read.                               |
+| Collection            | Isolated ECS worker pool                                 | queue depth, provider quota  | Restricted internet egress; no user session access.               |
+| Evidence/media        | Isolated ECS worker pool; GPU capacity only if justified | queue depth, processing time | S3 scoped grants, scanning tools, restricted egress.              |
+| Analysis              | Separate worker pool                                     | queue depth, model budget    | model gateway/provider access, limited evidence grants.           |
+| Notification/response | Separate worker pool                                     | pending deliveries           | approved provider endpoints only.                                 |
 
 Containers use immutable, content-addressed images from ECR, run as non-root, have defined CPU/memory limits, health checks, graceful shutdown, and no persistent local state. Compute is multi-AZ where the service/SLO needs it.
 
 ## Environment model
 
-| Environment | Purpose | Data policy | Promotion input |
-| --- | --- | --- | --- |
-| Local | Developer feedback | Synthetic/local data and MinIO | Developer machine only. |
-| Preview | Per-change UI/API contract validation | Sanitized fixtures; no production secrets | Pull request artifact. |
-| Staging | End-to-end, integration, load, release rehearsal | Synthetic or explicitly approved test data | Signed candidate image. |
-| Production | Customer workload | Production data only | Approved release after all gates. |
+| Environment | Purpose                                          | Data policy                                | Promotion input                   |
+| ----------- | ------------------------------------------------ | ------------------------------------------ | --------------------------------- |
+| Local       | Developer feedback                               | Synthetic/local data and MinIO             | Developer machine only.           |
+| Preview     | Per-change UI/API contract validation            | Sanitized fixtures; no production secrets  | Pull request artifact.            |
+| Staging     | End-to-end, integration, load, release rehearsal | Synthetic or explicitly approved test data | Signed candidate image.           |
+| Production  | Customer workload                                | Production data only                       | Approved release after all gates. |
 
 Configuration is declarative and environment-specific. Secrets come from the runtime secret manager, not GitHub variables copied into images. Feature flags let Aegis use shadow/review-only analysis, percentage rollout, regional disablement, and immediate kill switches.
 
 ## Data resilience and disaster recovery
 
-| Asset | Protection | Initial objective |
-| --- | --- | --- |
-| PostgreSQL | Managed HA, point-in-time recovery, tested logical/export recovery | RPO ≤ 15 minutes; RTO ≤ 4 hours. |
-| Evidence objects | Versioned S3, lifecycle policy, replicated or restore-tested copy as required | No loss of held evidence; recovery objective set by legal policy. |
-| Redis queues | Durable queue configuration plus authoritative job/outbox records in PostgreSQL | Rebuild/replay safely from durable records. |
-| Configuration/secrets | Infrastructure-as-code and versioned secret metadata | Recreate environment without manual drift. |
-| Observability | Central retention and separate security archive | Preserve incident-relevant audit/traces per policy. |
+| Asset                 | Protection                                                                      | Initial objective                                                 |
+| --------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| PostgreSQL            | Managed HA, point-in-time recovery, tested logical/export recovery              | RPO ≤ 15 minutes; RTO ≤ 4 hours.                                  |
+| Evidence objects      | Versioned S3, lifecycle policy, replicated or restore-tested copy as required   | No loss of held evidence; recovery objective set by legal policy. |
+| Redis queues          | Durable queue configuration plus authoritative job/outbox records in PostgreSQL | Rebuild/replay safely from durable records.                       |
+| Configuration/secrets | Infrastructure-as-code and versioned secret metadata                            | Recreate environment without manual drift.                        |
+| Observability         | Central retention and separate security archive                                 | Preserve incident-relevant audit/traces per policy.               |
 
 Run restore drills at least quarterly. Backups alone do not satisfy the objective; the drill must demonstrate scoped application recovery, evidence integrity verification, and auditability.
 

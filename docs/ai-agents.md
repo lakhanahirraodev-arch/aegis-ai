@@ -20,16 +20,16 @@ flowchart LR
 
 ## Agent roles
 
-| Agent | Inputs | Outputs | Guardrails |
-| --- | --- | --- | --- |
-| `DiscoveryAgent` | monitoring rule, platform results | normalized candidates, coverage | approved connectors/rate limits; no classification. |
-| `EvidenceAgent` | source URL/metadata | artifacts, hashes, capture manifest | SSRF, malware, MIME/size controls; no authenticated browsing. |
-| `IdentityMatchAgent` | approved identity refs, candidate assets | account/handle/likeness similarity | score is not identity proof; calibrated biometric handling. |
-| `SyntheticMediaAgent` | image/video/audio derivatives | deepfake/manipulation indicators | report uncertainty; never label a person deceptive. |
-| `ContentSimilarityAgent` | reference fingerprints, candidate media/text | hash/embedding match results | distinguish exact, transformed, semantic matches. |
-| `AbuseRiskAgent` | text/context/policy | harassment, doxxing, scam signals | redact sensitive logs; separate speech from actionable policy. |
-| `CaseSynthesisAgent` | findings/case history | cited case summary/recommendation | retrieval limited to workspace/case; no action authority. |
-| `ResponseDraftAgent` | approved case, platform rules | draft report/takedown/appeal | draft only; reviewer approval mandatory. |
+| Agent                    | Inputs                                       | Outputs                             | Guardrails                                                     |
+| ------------------------ | -------------------------------------------- | ----------------------------------- | -------------------------------------------------------------- |
+| `DiscoveryAgent`         | monitoring rule, platform results            | normalized candidates, coverage     | approved connectors/rate limits; no classification.            |
+| `EvidenceAgent`          | source URL/metadata                          | artifacts, hashes, capture manifest | SSRF, malware, MIME/size controls; no authenticated browsing.  |
+| `IdentityMatchAgent`     | approved identity refs, candidate assets     | account/handle/likeness similarity  | score is not identity proof; calibrated biometric handling.    |
+| `SyntheticMediaAgent`    | image/video/audio derivatives                | deepfake/manipulation indicators    | report uncertainty; never label a person deceptive.            |
+| `ContentSimilarityAgent` | reference fingerprints, candidate media/text | hash/embedding match results        | distinguish exact, transformed, semantic matches.              |
+| `AbuseRiskAgent`         | text/context/policy                          | harassment, doxxing, scam signals   | redact sensitive logs; separate speech from actionable policy. |
+| `CaseSynthesisAgent`     | findings/case history                        | cited case summary/recommendation   | retrieval limited to workspace/case; no action authority.      |
+| `ResponseDraftAgent`     | approved case, platform rules                | draft report/takedown/appeal        | draft only; reviewer approval mandatory.                       |
 
 ## Agent contract
 

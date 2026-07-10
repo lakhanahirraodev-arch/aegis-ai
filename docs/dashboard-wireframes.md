@@ -2,7 +2,7 @@
 
 ## Product principles
 
-The dashboard helps a person answer four questions in seconds: *What changed? How serious is it? What is the evidence? What safe next action should we take?* It avoids presenting an AI conclusion as a fact and makes confidence, evidence, policy state, and reviewer ownership visible.
+The dashboard helps a person answer four questions in seconds: _What changed? How serious is it? What is the evidence? What safe next action should we take?_ It avoids presenting an AI conclusion as a fact and makes confidence, evidence, policy state, and reviewer ownership visible.
 
 Navigation is permission-aware, but the API remains the authority. Mobile uses the same task order with a condensed bottom navigation and no evidence preview that bypasses signed access controls.
 
@@ -128,7 +128,7 @@ All secure-access requests emit an audit event. Bulk export is intentionally omi
 
 ## Monitoring and integration setup
 
-```text
+````text
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
 │ Monitoring rules                                                   [+ New rule]           │
 ├──────────────────────┬──────────┬────────────────────┬───────────┬──────────────────────┤
@@ -148,6 +148,6 @@ User: “Show today’s urgent threats and summarize what changed.”
 Assistant: [3 cited threat cards with time range and coverage note]
            “Two new impersonation detections and one content-repost cluster…”
            [Open filtered inbox] [Create briefing draft]
-```
+````
 
 Every answer identifies its workspace, time range, source citations, and limitations. The UI clearly separates a generated draft from an approved record.

@@ -4,29 +4,29 @@
 
 Every production component emits OpenTelemetry traces, structured JSON logs, and Prometheus-compatible metrics. Signals use a shared correlation ID across HTTP requests, outbox events, jobs, provider calls, evidence artifacts, and audit decisions. Logging is redacted before export; raw evidence, tokens, full prompts, legal names, and unbounded provider payloads are not observability data.
 
-| Signal family | Required dimensions | Primary owner |
-| --- | --- | --- |
-| API | route, status, error code, latency, workspace-plan class | API team |
-| Queue/job | queue, job type, age, attempt, outcome, provider, failure class | Worker team |
-| Evidence | capture outcome, artifact type, hash verification, quarantine, retention hold | Evidence owner |
-| Detection/AI | agent, model/policy version, latency, cost, verdict, reviewer override | Trust & Safety / AI owner |
-| Connector | platform, quota, rate-limit events, auth state, coverage freshness | Integration owner |
-| Security | auth failures, denied cross-tenant access, privileged action, secret/provider error | Security owner |
-| Business safety | open threat severity, time-to-triage, response backlog, coverage gap | Trust & Safety owner |
+| Signal family   | Required dimensions                                                                 | Primary owner             |
+| --------------- | ----------------------------------------------------------------------------------- | ------------------------- |
+| API             | route, status, error code, latency, workspace-plan class                            | API team                  |
+| Queue/job       | queue, job type, age, attempt, outcome, provider, failure class                     | Worker team               |
+| Evidence        | capture outcome, artifact type, hash verification, quarantine, retention hold       | Evidence owner            |
+| Detection/AI    | agent, model/policy version, latency, cost, verdict, reviewer override              | Trust & Safety / AI owner |
+| Connector       | platform, quota, rate-limit events, auth state, coverage freshness                  | Integration owner         |
+| Security        | auth failures, denied cross-tenant access, privileged action, secret/provider error | Security owner            |
+| Business safety | open threat severity, time-to-triage, response backlog, coverage gap                | Trust & Safety owner      |
 
 ## Initial service-level objectives
 
 Targets are reviewed quarterly and refined from observed traffic. They exclude an outage or delay of a third-party platform/provider from core API availability, but provider status is exposed to users and operations.
 
-| Service indicator | Initial objective | Error budget / action |
-| --- | --- | --- |
-| Dashboard/read API availability | 99.9% monthly | Page API/on-call when budget burn predicts breach. |
-| Read endpoint latency | p95 < 300 ms, p99 < 750 ms | Investigate query/edge regressions. |
-| Command acknowledgement | p95 < 500 ms; long work is 202 | Reject synchronous provider waits. |
-| Critical job start | p95 < 2 minutes from accepted command | Scale queue pool or apply intake controls. |
-| Evidence integrity | 100% captured artifacts have verified SHA-256 + manifest | Stop downstream analysis on violation. |
-| External action correctness | 0 duplicate submissions; 100% approval/audit linkage | Page immediately on violation. |
-| Backup recovery | quarterly restore meets stated RPO/RTO | Block launch/expansion on failed drill. |
+| Service indicator               | Initial objective                                        | Error budget / action                              |
+| ------------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| Dashboard/read API availability | 99.9% monthly                                            | Page API/on-call when budget burn predicts breach. |
+| Read endpoint latency           | p95 < 300 ms, p99 < 750 ms                               | Investigate query/edge regressions.                |
+| Command acknowledgement         | p95 < 500 ms; long work is 202                           | Reject synchronous provider waits.                 |
+| Critical job start              | p95 < 2 minutes from accepted command                    | Scale queue pool or apply intake controls.         |
+| Evidence integrity              | 100% captured artifacts have verified SHA-256 + manifest | Stop downstream analysis on violation.             |
+| External action correctness     | 0 duplicate submissions; 100% approval/audit linkage     | Page immediately on violation.                     |
+| Backup recovery                 | quarterly restore meets stated RPO/RTO                   | Block launch/expansion on failed drill.            |
 
 ## Dashboards and alerts
 
