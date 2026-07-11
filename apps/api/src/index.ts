@@ -29,6 +29,7 @@ import auditPlugin from "./plugins/audit";
 import clerkWebhookRoutes from "./routes/webhooks/clerk";
 import integrationRoutes from "./routes/integrations";
 import platformWebhookRoutes from "./routes/webhooks/platforms";
+import liveGuardianRoutes from "./routes/liveGuardian";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -60,6 +61,9 @@ server.register(integrationRoutes);
 
 // Register platform webhook ingestion routes
 server.register(platformWebhookRoutes);
+
+// Register Live Guardian chat stream moderation console routes
+server.register(liveGuardianRoutes);
 
 // Health check endpoints as documented in docs/api.md
 server.get("/healthz", async () => {

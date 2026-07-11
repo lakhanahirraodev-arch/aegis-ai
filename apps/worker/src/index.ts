@@ -46,8 +46,13 @@ const platformEventsWorker = new Worker(
     });
 
     try {
-      // Future: dispatch to AI agents, run moderation pipeline, etc.
-      // For Sprint 4, we simply mark the event as PROCESSED and confirm persistence.
+      // Execute the Live Guardian MVP moderation pipeline for chat events
+      if (eventType === "CHAT_MESSAGE") {
+        const { workspaceId, payload } = job.data;
+        const { processLiveChatMessage } = require("./consumers/liveGuardianConsumer");
+        await processLiveChatMessage(workspaceId, platform, payload);
+      }
+
       await prisma.ingestedEvent.update({
         where: { id: ingestedEventId },
         data: {
