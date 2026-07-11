@@ -14,7 +14,6 @@ declare module "fastify" {
 }
 
 const authPlugin: FastifyPluginAsync = async (fastify) => {
-  const clerkSecretKey = process.env.CLERK_SECRET_KEY;
   const isDev = process.env.NODE_ENV === "development";
 
   // Cache JWKS client

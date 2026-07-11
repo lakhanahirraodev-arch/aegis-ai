@@ -12,7 +12,7 @@ import { validateEnv } from "@aegis/config";
 let env: any;
 try {
   env = validateEnv(process.env);
-} catch (err) {
+} catch (_err) {
   console.warn("⚠️ Environment validation failed. Falling back to dev defaults.");
   env = {
     NODE_ENV: "development",
@@ -27,6 +27,8 @@ import permissionsPlugin from "./plugins/permissions";
 import featureFlagsPlugin from "./plugins/featureFlags";
 import auditPlugin from "./plugins/audit";
 import clerkWebhookRoutes from "./routes/webhooks/clerk";
+import integrationRoutes from "./routes/integrations";
+import platformWebhookRoutes from "./routes/webhooks/platforms";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -52,6 +54,12 @@ server.register(auditPlugin);
 
 // Register Clerk synchronization webhook routes
 server.register(clerkWebhookRoutes);
+
+// Register platform integration routes (OAuth, connect/disconnect, health)
+server.register(integrationRoutes);
+
+// Register platform webhook ingestion routes
+server.register(platformWebhookRoutes);
 
 // Health check endpoints as documented in docs/api.md
 server.get("/healthz", async () => {

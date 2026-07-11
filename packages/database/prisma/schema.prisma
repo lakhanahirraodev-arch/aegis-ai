@@ -397,6 +397,14 @@ enum LiveAppealStatus {
   CLOSED
 }
 
+enum IngestedEventStatus {
+  QUEUED
+  PROCESSING
+  PROCESSED
+  FAILED
+  DEAD_LETTER
+}
+
 enum LiveIncidentStatus {
   OPEN
   ACKNOWLEDGED
@@ -463,6 +471,7 @@ model Workspace {
   communityHealthSnapshots CommunityHealthSnapshot[]
   liveMessageEvidence LiveMessageEvidence[]
   auditLogs           AuditLog[]
+  ingestedEvents      IngestedEvent[]
 
   @@map("workspaces")
 }
@@ -1164,4 +1173,25 @@ model AuditLog {
   @@index([workspaceId, occurredAt])
   @@index([workspaceId, resourceType, resourceId])
   @@map("audit_logs")
+}
+
+model IngestedEvent {
+  id             String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId    String              @map("workspace_id") @db.Uuid
+  platform       Platform
+  eventType      String              @map("event_type")
+  externalId     String?             @map("external_id")
+  payload        Json
+  rawPayload     Json?               @map("raw_payload")
+  status         IngestedEventStatus @default(QUEUED)
+  errorMessage   String?             @map("error_message")
+  processedAt    DateTime?           @map("processed_at") @db.Timestamptz(6)
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace      Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, platform, externalId, eventType])
+  @@index([workspaceId, status])
+  @@index([createdAt])
+  @@map("ingested_events")
 }

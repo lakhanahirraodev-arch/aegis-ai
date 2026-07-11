@@ -1,6 +1,6 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from "fastify";
 import fp from "fastify-plugin";
-import { Permission, WorkspaceRole, hasPermission } from "@aegis/contracts";
+import { Permission, hasPermission } from "@aegis/contracts";
 
 declare module "fastify" {
   interface FastifyInstance {
