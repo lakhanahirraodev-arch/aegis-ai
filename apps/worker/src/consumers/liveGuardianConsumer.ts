@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { prisma } from "@aegis/database";
-import { moderationPipeline } from "../agents/moderationPipeline";
+import { IntelligenceEngine } from "../agents/intelligenceEngine";
 
 export interface ChatMessagePayload {
   messageId?: string;
@@ -11,7 +11,7 @@ export interface ChatMessagePayload {
 }
 
 /**
- * liveGuardianConsumer - Ingests chat messages, executes the moderation pipeline,
+ * liveGuardianConsumer - Ingests chat messages, executes the AI Intelligence Engine,
  * and handles database updates for enforcements, timeline entries, evidence capturing, and risk scoring.
  */
 export async function processLiveChatMessage(
@@ -95,8 +95,36 @@ export async function processLiveChatMessage(
     },
   });
 
-  // 4. Run the Moderation Pipeline
-  const analysis = moderationPipeline.analyze(rawText);
+  // Query infraction history for Context Builder
+  const historicalInfractionsCount = await prisma.liveModerationAction.count({
+    where: {
+      workspaceId,
+      liveChatMessage: {
+        authorExternalIdHash: authorHash,
+      },
+      actionType: "WARN",
+    },
+  });
+
+  const previousIncidentsCount = await prisma.liveIncident.count({
+    where: {
+      workspaceId,
+      liveSessionId: liveSession.id,
+      status: "OPEN",
+    },
+  });
+
+  // 4. Run the AI Intelligence Engine
+  const analysis = await IntelligenceEngine.analyze(
+    workspaceId,
+    rawText,
+    upperPlatform,
+    liveChannel.displayName,
+    {
+      historicalInfractionsCount,
+      previousIncidentsCount,
+    },
+  );
 
   // 5. Create LiveModerationFindings
   for (const finding of analysis.findings) {
@@ -121,11 +149,11 @@ export async function processLiveChatMessage(
       workspaceId,
       liveSessionId: liveSession.id,
       liveChatMessageId: liveMessage.id,
-      actionType: analysis.recommendedAction as any,
+      actionType: analysis.dbAction,
       source: "POLICY_AUTOMATION",
       status: "SUGGESTED",
       reasonCode: "AI_SUGGESTION",
-      explanation: analysis.reason,
+      explanation: analysis.explanation,
       policyVersion: "1.0.0",
       idempotencyKey: crypto.randomUUID(),
     },
@@ -146,8 +174,10 @@ export async function processLiveChatMessage(
           user: authorName,
           timestamp: new Date().toISOString(),
           riskScore: analysis.riskScore,
-          reason: analysis.reason,
+          reason: analysis.explanation,
           aiRecommendation: analysis.recommendedAction,
+          aiProvider: analysis.aiProviderName,
+          confidence: analysis.confidence,
         },
         capturedAt: new Date(),
       },
@@ -206,7 +236,9 @@ export async function processLiveChatMessage(
         text: rawText,
         riskScore: analysis.riskScore,
         recommendedAction: analysis.recommendedAction,
-        reason: analysis.reason,
+        reason: analysis.explanation,
+        aiProvider: analysis.aiProviderName,
+        confidence: analysis.confidence,
       },
     },
   });

@@ -472,6 +472,8 @@ model Workspace {
   liveMessageEvidence LiveMessageEvidence[]
   auditLogs           AuditLog[]
   ingestedEvents      IngestedEvent[]
+  workspaceAIConfig   WorkspaceAIConfig?
+  aiUsageLogs         AIUsageLog[]
 
   @@map("workspaces")
 }
@@ -1195,3 +1197,33 @@ model IngestedEvent {
   @@index([createdAt])
   @@map("ingested_events")
 }
+
+model WorkspaceAIConfig {
+  workspaceId        String   @id @map("workspace_id") @db.Uuid
+  activeProvider     String   @default("MOCK") @map("active_provider")
+  providerSettings   Json     @default("{}") @map("provider_settings")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  workspace          Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_ai_configs")
+}
+
+model AIUsageLog {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId   String   @map("workspace_id") @db.Uuid
+  provider      String
+  model         String
+  requestId     String   @map("request_id")
+  inputTokens   Int      @map("input_tokens")
+  outputTokens  Int      @map("output_tokens")
+  estimatedCost Decimal  @map("estimated_cost") @db.Decimal(10, 6)
+  latencyMs     Int      @map("latency_ms")
+  status        String
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@map("ai_usage_logs")
+}
+

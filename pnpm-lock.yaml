@@ -147,6 +147,9 @@ importers:
 
   apps/worker:
     dependencies:
+      "@aegis/ai-contracts":
+        specifier: workspace:*
+        version: link:../../packages/ai-contracts
       "@aegis/config":
         specifier: workspace:*
         version: link:../../packages/config
@@ -178,12 +181,18 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)
 
   packages/ai-contracts:
     dependencies:
       "@aegis/contracts":
         specifier: workspace:*
         version: link:../contracts
+      "@aegis/database":
+        specifier: workspace:*
+        version: link:../database
       zod:
         specifier: ^3.23.8
         version: 3.25.76

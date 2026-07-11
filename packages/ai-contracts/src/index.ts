@@ -27,3 +27,15 @@ export const agentFindingSchema = z.object({
 });
 
 export type AgentFinding = z.infer<typeof agentFindingSchema>;
+
+// AI Providers, Context, Prompts, Managers & Usage Telemetry
+export * from "./providers/AIProvider";
+export * from "./providers/MockAIProvider";
+export * from "./providers/OpenAIProvider";
+export * from "./providers/GeminiProvider";
+export * from "./providers/ClaudeProvider";
+export * from "./providers/ProviderRegistry";
+export * from "./context/ContextBuilder";
+export * from "./prompts/PromptManager";
+export * from "./manager/AIProviderManager";
+export * from "./telemetry/UsageTracker";
