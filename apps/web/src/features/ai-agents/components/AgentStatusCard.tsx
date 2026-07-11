@@ -12,30 +12,34 @@ interface AgentStatusCardProps {
 
 export function AgentStatusCard({ name, type, status, actionsCount }: AgentStatusCardProps) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between group">
-      <div className="flex items-center space-x-3">
-        <div className="h-9 w-9 bg-indigo-500/10 rounded-lg border border-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-          <Activity className="h-4 w-4" />
+    <div className="flex items-center justify-between py-4 border-b border-border-subtle last:border-0 group select-none">
+      <div className="flex items-center space-x-4 min-w-0">
+        {/* AI surface color (rgba(139, 124, 248, 0.10)) used exclusively for AI Agent icon background */}
+        <div className="h-9 w-9 bg-ai-surface rounded-lg flex items-center justify-center shrink-0 border border-ai-accent/10">
+          <Activity className="h-4.5 w-4.5 text-ai-accent group-hover:scale-105 transition-custom" />
         </div>
-        <div>
-          <h4 className="text-xs font-bold text-slate-200">{name}</h4>
-          <span className="text-[10px] text-slate-500 font-mono">{type}</span>
+        <div className="min-w-0">
+          <h4 className="text-body font-medium text-text-primary truncate">{name}</h4>
+          <span className="text-metadata text-text-muted font-mono">{type}</span>
         </div>
       </div>
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 shrink-0">
         <div className="text-right">
-          <div className="text-[10px] text-slate-500 font-mono">Actions</div>
-          <div className="text-xs font-bold text-slate-300 font-mono">{actionsCount}</div>
+          <div className="text-metadata font-mono text-text-secondary font-medium">
+            {actionsCount} actions
+          </div>
         </div>
+
+        {/* Simple 8px circle. Green: Healthy, Amber: Idle/Warning, Purple (AI): AI Processing */}
         <span
-          className={`h-2.5 w-2.5 rounded-full ${
+          className={`h-2 w-2 rounded-full ${
             status === "ACTIVE"
-              ? "bg-emerald-400 animate-pulse"
+              ? "bg-ai-accent"
               : status === "IDLE"
-                ? "bg-amber-400"
-                : "bg-slate-600"
+                ? "bg-status-amber"
+                : "bg-text-disabled"
           }`}
-        ></span>
+        />
       </div>
     </div>
   );

@@ -5,18 +5,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   RefreshCw,
   Link2,
   Link2Off,
   Shield,
   Zap,
   Clock,
-  Globe,
   ExternalLink,
 } from "lucide-react";
 import DashboardPageWrapper from "@/shared/components/DashboardPageWrapper";
-import { StatCard } from "@/shared/components/Widgets";
 
 // ─── Platform metadata ──────────────────────────────────────────────────────
 
@@ -46,8 +43,8 @@ const PLATFORM_META: Record<PlatformKey, PlatformMeta> = {
     scopes: [],
     webhookEnabled: false,
     isFullyImplemented: true,
-    color: "#FF0000",
-    iconBg: "bg-red-500/10 border-red-500/20",
+    color: "#EF4444",
+    iconBg: "bg-status-red-bg border-status-red/10",
   },
   TWITCH: {
     name: "Twitch",
@@ -59,8 +56,8 @@ const PLATFORM_META: Record<PlatformKey, PlatformMeta> = {
     scopes: [],
     webhookEnabled: false,
     isFullyImplemented: true,
-    color: "#9146FF",
-    iconBg: "bg-purple-500/10 border-purple-500/20",
+    color: "#A855F7",
+    iconBg: "bg-accent-tint border-accent/15",
   },
   DISCORD: {
     name: "Discord",
@@ -72,8 +69,8 @@ const PLATFORM_META: Record<PlatformKey, PlatformMeta> = {
     scopes: [],
     webhookEnabled: false,
     isFullyImplemented: true,
-    color: "#5865F2",
-    iconBg: "bg-indigo-500/10 border-indigo-500/20",
+    color: "#38BDF8",
+    iconBg: "bg-status-blue-bg border-status-blue/15",
   },
   TIKTOK: {
     name: "TikTok",
@@ -84,8 +81,8 @@ const PLATFORM_META: Record<PlatformKey, PlatformMeta> = {
     scopes: [],
     webhookEnabled: false,
     isFullyImplemented: false,
-    color: "#010101",
-    iconBg: "bg-neutral-500/10 border-neutral-500/20",
+    color: "#B5BEC9",
+    iconBg: "bg-surface-hover border-border-default",
   },
   INSTAGRAM: {
     name: "Instagram",
@@ -96,8 +93,8 @@ const PLATFORM_META: Record<PlatformKey, PlatformMeta> = {
     scopes: [],
     webhookEnabled: false,
     isFullyImplemented: false,
-    color: "#E1306C",
-    iconBg: "bg-pink-500/10 border-pink-500/20",
+    color: "#B5BEC9",
+    iconBg: "bg-surface-hover border-border-default",
   },
   KICK: {
     name: "Kick",
@@ -108,8 +105,8 @@ const PLATFORM_META: Record<PlatformKey, PlatformMeta> = {
     scopes: [],
     webhookEnabled: false,
     isFullyImplemented: false,
-    color: "#53FC18",
-    iconBg: "bg-green-500/10 border-green-500/20",
+    color: "#B5BEC9",
+    iconBg: "bg-surface-hover border-border-default",
   },
   X: {
     name: "X (Twitter)",
@@ -121,27 +118,27 @@ const PLATFORM_META: Record<PlatformKey, PlatformMeta> = {
     scopes: [],
     webhookEnabled: false,
     isFullyImplemented: false,
-    color: "#1DA1F2",
-    iconBg: "bg-sky-500/10 border-sky-500/20",
+    color: "#B5BEC9",
+    iconBg: "bg-surface-hover border-border-default",
   },
 };
 
 // ─── Platform Icon Components ─────────────────────────────────────────────
 
-function PlatformIcon({ platform, size = 24 }: { platform: PlatformKey; size?: number }) {
+function PlatformIcon({ platform, size = 18 }: { platform: PlatformKey; size?: number }) {
   const icons: Record<PlatformKey, React.ReactNode> = {
     YOUTUBE: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="#FF0000">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="#EF4444">
         <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
       </svg>
     ),
     TWITCH: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="#9146FF">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="#3B82F6">
         <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" />
       </svg>
     ),
     DISCORD: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="#5865F2">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="#38BDF8">
         <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.079.11 18.1.132 18.11a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" />
       </svg>
     ),
@@ -151,20 +148,12 @@ function PlatformIcon({ platform, size = 24 }: { platform: PlatformKey; size?: n
       </svg>
     ),
     INSTAGRAM: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="url(#ig-gradient)">
-        <defs>
-          <linearGradient id="ig-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#F58529" />
-            <stop offset="50%" stopColor="#DD2A7B" />
-            <stop offset="100%" stopColor="#8134AF" />
-          </linearGradient>
-        </defs>
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
       </svg>
     ),
     KICK: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="#53FC18">
-        <path d="M0 0h24v24H0z" fill="none" />
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
         <path d="M5 3h14v18H5V3zm7 4l-3 5 3 5h4l-3-5 3-5h-4z" />
       </svg>
     ),
@@ -183,39 +172,39 @@ function StatusBadge({ status }: { status: PlatformMeta["status"] }) {
   const configs = {
     ACTIVE: {
       label: "Connected",
-      icon: CheckCircle2,
-      className: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+      className: "text-status-green bg-status-green/5 border-status-green/10",
+      dotClass: "bg-status-green",
     },
     PENDING: {
       label: "Pending",
-      icon: Clock,
-      className: "text-amber-400 bg-amber-400/10 border-amber-400/20",
+      className: "text-status-amber bg-status-amber/5 border-status-amber/10",
+      dotClass: "bg-status-amber",
     },
     REAUTH_REQUIRED: {
       label: "Reauth Required",
-      icon: AlertTriangle,
-      className: "text-orange-400 bg-orange-400/10 border-orange-400/20",
+      className: "text-status-amber bg-status-amber/5 border-status-amber/10",
+      dotClass: "bg-status-amber",
     },
     REVOKED: {
       label: "Disconnected",
-      icon: XCircle,
-      className: "text-red-400 bg-red-400/10 border-red-400/20",
+      className: "text-status-red bg-status-red/5 border-status-red/10",
+      dotClass: "bg-status-red",
     },
     NOT_CONNECTED: {
       label: "Not Connected",
-      icon: Globe,
-      className: "text-slate-400 bg-slate-400/10 border-slate-400/20",
+      className: "text-text-muted bg-surface-canvas border-border-default",
+      dotClass: "bg-text-disabled",
     },
   };
 
   const cfg = configs[status];
-  const Icon = cfg.icon;
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.className}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-metadata font-mono border ${cfg.className}`}
     >
-      <Icon className="w-3 h-3" />
+      {/* Simple 8px circle dot */}
+      <span className={`h-2 w-2 rounded-full ${cfg.dotClass}`} />
       {cfg.label}
     </span>
   );
@@ -245,70 +234,50 @@ function PlatformCard({
   const isStub = !meta.isFullyImplemented;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={`relative bg-slate-900 border rounded-xl p-5 flex flex-col gap-4 transition-colors ${
-        isConnected ? "border-slate-700 shadow-lg shadow-black/20" : "border-slate-800"
-      } ${isStub ? "opacity-70" : "hover:border-slate-600"}`}
+    <div
+      className={`relative bg-surface-card border border-border-default rounded-xl p-6 flex flex-col gap-4 transition-custom select-none shadow-subtle ${
+        isConnected ? "border-accent" : "hover:border-border-default"
+      } ${isStub ? "opacity-60" : ""}`}
     >
       {/* Coming soon badge */}
       {isStub && (
-        <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">
+        <div className="absolute top-4 right-4 px-2 py-0.5 rounded-md text-metadata font-medium bg-surface-hover text-text-muted border border-border-default">
           Coming Soon
         </div>
       )}
 
       {/* Header */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-4">
         <div
-          className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${meta.iconBg}`}
+          className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 bg-surface-canvas border-border-default`}
         >
           <PlatformIcon platform={platform} size={20} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-white text-sm">{meta.name}</h3>
+            <h3 className="font-semibold text-text-primary text-card-title">{meta.name}</h3>
             <StatusBadge status={meta.status} />
           </div>
-          {meta.handle && <p className="text-xs text-slate-400 mt-0.5 truncate">@{meta.handle}</p>}
+          {meta.handle && (
+            <p className="text-metadata text-text-muted mt-0.5 truncate">@{meta.handle}</p>
+          )}
         </div>
       </div>
 
-      {/* Description */}
-      <p className="text-xs text-slate-400 leading-relaxed">{meta.description}</p>
+      {/* Description: body text (15px) */}
+      <p className="text-body text-text-secondary leading-relaxed">{meta.description}</p>
 
-      {/* Connected info */}
+      {/* Connected details */}
       {isConnected && meta.lastSync && (
-        <div className="flex items-center gap-4 text-xs text-slate-500">
-          <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            Last sync {meta.lastSync}
+        <div className="flex items-center gap-3 text-metadata text-text-muted">
+          <span className="flex items-center gap-1 font-mono">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            Sync: {meta.lastSync}
           </span>
           {meta.webhookEnabled && (
-            <span className="flex items-center gap-1 text-emerald-500">
-              <Zap className="w-3 h-3" />
+            <span className="flex items-center gap-1 text-status-green font-mono">
+              <Zap className="w-3.5 h-3.5 text-status-green" />
               Webhooks active
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Scopes */}
-      {isConnected && meta.scopes.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {meta.scopes.slice(0, 3).map((scope) => (
-            <span
-              key={scope}
-              className="px-1.5 py-0.5 text-xs bg-slate-800 text-slate-400 rounded font-mono"
-            >
-              {scope.split("/").pop() ?? scope}
-            </span>
-          ))}
-          {meta.scopes.length > 3 && (
-            <span className="px-1.5 py-0.5 text-xs bg-slate-800 text-slate-500 rounded">
-              +{meta.scopes.length - 3} more
             </span>
           )}
         </div>
@@ -316,25 +285,25 @@ function PlatformCard({
 
       {/* Webhook endpoint */}
       {isConnected && (
-        <div className="px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded text-xs text-slate-500 font-mono truncate select-all">
+        <div className="px-3 py-2 bg-surface-canvas border border-border-default rounded-md text-metadata text-text-muted font-mono truncate select-all">
           POST /v1/webhooks/platforms/{platform.toLowerCase()}
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex gap-2 mt-auto">
+      <div className="flex gap-2.5 mt-auto">
         {!isConnected && !isRevoked && (
           <button
             onClick={() => !isStub && onConnect(platform)}
             disabled={loading || isStub}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-button font-medium transition-custom shadow-subtle ${
               isStub
-                ? "bg-slate-800 text-slate-600 cursor-not-allowed"
-                : "bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50"
+                ? "bg-surface-canvas text-text-disabled cursor-not-allowed border border-border-default"
+                : "bg-accent hover:bg-accent-hover text-white disabled:opacity-50"
             }`}
           >
-            <Link2 className="w-3.5 h-3.5" />
-            Connect
+            <Link2 className="w-4 h-4" />
+            Connect Platform
           </button>
         )}
 
@@ -342,9 +311,9 @@ function PlatformCard({
           <button
             onClick={() => onReconnect(platform)}
             disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 border border-amber-600/30 transition-all disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-button font-medium bg-status-amber-bg hover:bg-status-amber-bg/85 text-status-amber border border-status-amber/15 transition-custom disabled:opacity-50 shadow-subtle"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="w-4 h-4" />
             Reconnect
           </button>
         )}
@@ -354,23 +323,23 @@ function PlatformCard({
             <button
               onClick={() => onReconnect(platform)}
               disabled={loading}
-              className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-button font-medium bg-surface-hover hover:bg-surface-hover/80 text-text-secondary border border-border-default transition-custom disabled:opacity-50 shadow-subtle"
               title="Refresh connection"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <RefreshCw className="w-4 h-4" />
             </button>
             <button
               onClick={() => onDisconnect(platform)}
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-button font-medium bg-status-red-bg hover:bg-status-red-bg/85 text-status-red border border-status-red/15 transition-custom disabled:opacity-50 shadow-subtle"
             >
-              <Link2Off className="w-3.5 h-3.5" />
+              <Link2Off className="w-4 h-4" />
               Disconnect
             </button>
           </>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -378,32 +347,35 @@ function PlatformCard({
 
 function WebhookSecurityPanel() {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-      <div className="flex items-center gap-2 mb-3">
-        <Shield className="w-4 h-4 text-indigo-400" />
-        <h3 className="font-semibold text-white text-sm">Webhook Security</h3>
+    <div className="bg-surface-card border border-border-default rounded-xl p-6 space-y-4 select-none shadow-subtle">
+      <div className="flex items-center gap-2.5 mb-1">
+        <Shield className="w-4.5 h-4.5 text-accent" />
+        <h3 className="font-semibold text-text-primary text-card-title">
+          Webhook Verification Policy
+        </h3>
       </div>
-      <p className="text-sm text-slate-400 leading-relaxed mb-4">
-        All inbound webhooks are verified using platform-native signature algorithms before
-        processing. Twitch uses HMAC-SHA256, Discord uses Ed25519, and YouTube uses HTTPS
-        subscription verification.
+      <p className="text-body text-text-secondary leading-relaxed">
+        All inbound webhooks are verified using cryptographic signature verification algorithms
+        before payload normalization and dispatch. Twitch uses HMAC-SHA256, Discord uses Ed25519,
+        and YouTube uses HTTPS challenge verification.
       </p>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between py-2 border-b border-slate-800">
-          <span className="text-xs text-slate-400">Twitch EventSub</span>
-          <span className="text-xs text-emerald-400 font-mono">HMAC-SHA256</span>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+        <div className="p-4 bg-surface-canvas border border-border-default rounded-xl shadow-subtle">
+          <div className="text-metadata text-text-muted font-mono uppercase">Twitch</div>
+          <div className="text-body font-semibold text-text-secondary mt-1">HMAC-SHA256</div>
         </div>
-        <div className="flex items-center justify-between py-2 border-b border-slate-800">
-          <span className="text-xs text-slate-400">Discord Interactions</span>
-          <span className="text-xs text-emerald-400 font-mono">Ed25519</span>
+        <div className="p-4 bg-surface-canvas border border-border-default rounded-xl shadow-subtle">
+          <div className="text-metadata text-text-muted font-mono uppercase">Discord</div>
+          <div className="text-body font-semibold text-text-secondary mt-1">Ed25519</div>
         </div>
-        <div className="flex items-center justify-between py-2 border-b border-slate-800">
-          <span className="text-xs text-slate-400">YouTube PubSubHubbub</span>
-          <span className="text-xs text-emerald-400 font-mono">HTTPS + hub.secret</span>
+        <div className="p-4 bg-surface-canvas border border-border-default rounded-xl shadow-subtle">
+          <div className="text-metadata text-text-muted font-mono uppercase">YouTube</div>
+          <div className="text-body font-semibold text-text-secondary mt-1">hub.secret</div>
         </div>
-        <div className="flex items-center justify-between py-2">
-          <span className="text-xs text-slate-400">OAuth Tokens (at rest)</span>
-          <span className="text-xs text-emerald-400 font-mono">AES-256-GCM</span>
+        <div className="p-4 bg-surface-canvas border border-border-default rounded-xl shadow-subtle">
+          <div className="text-metadata text-text-muted font-mono uppercase">Vault Store</div>
+          <div className="text-body font-semibold text-text-secondary mt-1">AES-256-GCM</div>
         </div>
       </div>
     </div>
@@ -430,8 +402,6 @@ export default function IntegrationsPage() {
   const handleConnect = useCallback(async (platform: PlatformKey) => {
     setLoadingPlatform(platform);
     try {
-      // In a real app, call the API to get the OAuth URL and redirect
-      // For now, simulate the connection flow
       await new Promise((resolve) => setTimeout(resolve, 1200));
       setPlatforms((prev) => ({
         ...prev,
@@ -496,9 +466,6 @@ export default function IntegrationsPage() {
     }
   }, []);
 
-  const connectedCount = Object.values(platforms).filter((p) => p.status === "ACTIVE").length;
-  const activeWebhooks = Object.values(platforms).filter((p) => p.webhookEnabled).length;
-
   return (
     <DashboardPageWrapper
       title="Platform Integrations"
@@ -512,68 +479,46 @@ export default function IntegrationsPage() {
             initial={{ opacity: 0, y: -12, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.95 }}
-            className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-2xl text-sm font-medium border ${
+            className={`fixed top-4 right-4 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-2xl text-metadata font-medium border ${
               notification.type === "success"
-                ? "bg-emerald-950 border-emerald-700 text-emerald-300"
-                : "bg-red-950 border-red-700 text-red-300"
+                ? "bg-status-green-bg border-status-green/10 text-status-green"
+                : "bg-status-red-bg border-status-red/10 text-status-red"
             }`}
           >
             {notification.type === "success" ? (
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4.5 h-4.5" />
             ) : (
-              <XCircle className="w-4 h-4" />
+              <XCircle className="w-4.5 h-4.5" />
             )}
             {notification.message}
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="space-y-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard
-            title="Connected Platforms"
-            value={String(connectedCount)}
-            trend={connectedCount > 0 ? "Active" : "None"}
-            trendDirection={connectedCount > 0 ? "up" : "neutral"}
-            description="Live platform integrations"
-          />
-          <StatCard
-            title="Active Webhooks"
-            value={String(activeWebhooks)}
-            trend={activeWebhooks > 0 ? "Receiving" : "Idle"}
-            trendDirection={activeWebhooks > 0 ? "up" : "neutral"}
-            description="Real-time event streams"
-          />
-          <StatCard
-            title="Available Platforms"
-            value="7"
-            trend="3 Full, 4 Stub"
-            trendDirection="neutral"
-            description="Supported integrations"
-          />
-        </div>
-
+      <div className="space-y-12">
         {/* Fully implemented platforms */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-semibold text-white">Live Platforms</h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Full OAuth, webhooks, and event ingestion
+              <h2 className="text-section font-semibold text-text-primary select-none">
+                Ingest Channels
+              </h2>
+              <p className="text-metadata text-text-muted mt-0.5 select-none">
+                Full OAuth handshake, automated webhooks, and raw event dispatch
               </p>
             </div>
             <a
               href="https://docs.aegis.ai/integrations"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+              className="flex items-center gap-1.5 text-metadata text-accent hover:underline transition-colors font-medium"
             >
-              <ExternalLink className="w-3 h-3" />
-              Integration docs
+              <ExternalLink className="w-4 h-4" />
+              Integration Docs
             </a>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {(["YOUTUBE", "TWITCH", "DISCORD"] as const).map((platform) => (
               <PlatformCard
                 key={platform}
@@ -589,14 +534,18 @@ export default function IntegrationsPage() {
         </div>
 
         {/* Stub/coming soon platforms */}
-        <div>
-          <div className="mb-4">
-            <h2 className="text-base font-semibold text-white">Coming Soon</h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Infrastructure ready — full provider implementation in a future sprint
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-section font-semibold text-text-primary select-none font-sans">
+              Upcoming Ingests
+            </h2>
+            <p className="text-metadata text-text-muted mt-0.5 select-none font-sans">
+              Interface and database contracts compiled — platform integration launching in
+              subsequent release cycles
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {(["TIKTOK", "INSTAGRAM", "KICK", "X"] as const).map((platform) => (
               <PlatformCard
                 key={platform}

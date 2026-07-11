@@ -10,7 +10,7 @@ import {
 } from "@/shared/components/Widgets";
 import { AgentStatusCard } from "@/features/ai-agents/components/AgentStatusCard";
 import { IncidentCard } from "@/features/evidence-center/components/IncidentCard";
-import { Radio, Activity, Globe } from "lucide-react";
+import { Activity, Globe, Radio } from "lucide-react";
 
 export default function DashboardCockpitPage() {
   const statCards = [
@@ -51,7 +51,7 @@ export default function DashboardCockpitPage() {
       riskScore: 84,
       description:
         "Copyrighted media match discovered inside audio track on unauthorized creator channel.",
-      detectedAt: "10 mins ago",
+      detectedAt: "10m ago",
       status: "OPEN" as const,
     },
     {
@@ -59,7 +59,7 @@ export default function DashboardCockpitPage() {
       platform: "X / Twitter",
       riskScore: 61,
       description: "Fake brand handle profile mimicking workspace logo metadata.",
-      detectedAt: "1 hour ago",
+      detectedAt: "1h ago",
       status: "RESOLVED" as const,
     },
   ];
@@ -118,152 +118,217 @@ export default function DashboardCockpitPage() {
       description="Real-time operations center tracking identity, reputation, content, and live chat telemetry."
       category="Monitor"
     >
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="space-y-10">
+        {/* Core Hero Banner Section (Answers: Am I protected? Is anything wrong? What next?) */}
+        <div className="bg-surface-card border border-border-default rounded-xl p-8 space-y-6 shadow-subtle">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 text-metadata text-status-green font-medium">
+                <span className="h-2 w-2 rounded-full bg-status-green"></span>
+                <span>Active Guardian System Secure</span>
+              </div>
+              <h1 className="text-hero font-semibold text-text-primary tracking-tight">
+                Your workspace is actively protected.
+              </h1>
+              <p className="text-body text-text-secondary leading-relaxed max-w-2xl">
+                Aegis AI successfully scanned 98.9k assets in the last 24 hours. There are currently{" "}
+                <span className="text-status-red font-medium">24 active threats</span> that require
+                your triage attention.
+              </p>
+            </div>
+
+            <button
+              onClick={() => (window.location.href = "/dashboard/incidents")}
+              className="px-5 py-3 bg-accent hover:bg-accent-hover text-white text-button font-medium rounded-xl transition-custom shrink-0 self-start md:self-center shadow-subtle"
+            >
+              Triage Threats
+            </button>
+          </div>
+        </div>
+
+        {/* Stats metrics grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {statCards.map((card) => (
             <StatCard key={card.title} {...card} />
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-indigo-400" />
+        {/* Core telemetry details section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Charts & Activity Ingests columns */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Telemetry charts */}
+            <div className="bg-surface-card border border-border-default rounded-xl p-6 space-y-6 shadow-subtle">
+              <div className="flex justify-between items-center pb-3 border-b border-border-default">
+                <h3 className="font-semibold text-card-title text-text-primary flex items-center gap-2.5 select-none">
+                  <Activity className="h-4.5 w-4.5 text-accent" />
                   Reputation Trends & Detection Timelines
                 </h3>
-                <span className="text-[10px] font-mono text-slate-500 uppercase">
-                  Live telemetry ingest
-                </span>
+                <span className="text-metadata font-mono text-text-muted">Live telemetry</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="text-xs text-slate-400 font-medium">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="text-metadata text-text-secondary font-medium select-none">
                     Monthly Risk Profile Trends
                   </div>
                   <MockAreaChart />
                 </div>
-                <div className="space-y-2">
-                  <div className="text-xs text-slate-400 font-medium">Daily Asset Ingest Rate</div>
+                <div className="space-y-3">
+                  <div className="text-metadata text-text-secondary font-medium select-none">
+                    Daily Asset Ingest Rate
+                  </div>
                   <MockBarChart />
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-                <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                  <Radio className="h-4 w-4 text-cyan-400 Inbound active animation" />
+            {/* Ingest and Broadcast panels */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Broadcast feeds */}
+              <div className="bg-surface-card border border-border-default rounded-xl p-6 space-y-4 shadow-subtle">
+                <h3 className="font-semibold text-card-title text-text-primary flex items-center gap-2.5 select-none">
+                  <Radio className="h-4.5 w-4.5 text-accent" />
                   Live Broadcast Feeds
                 </h3>
-                <div className="space-y-3">
-                  <div className="p-3 bg-slate-950 border border-slate-850 rounded-lg flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
-                      <span className="text-xs font-bold text-slate-200">Twitch Stream #1</span>
+                <div className="space-y-3 pt-1">
+                  <div className="p-3 bg-surface-canvas border border-border-default rounded-lg flex items-center justify-between transition-custom hover:bg-surface-hover select-none">
+                    <div className="flex items-center space-x-2.5">
+                      <span className="h-2 w-2 rounded-full bg-status-green"></span>
+                      <span className="text-body font-medium text-text-secondary">
+                        Twitch Channel
+                      </span>
                     </div>
-                    <span className="text-xxs text-indigo-400 font-mono">1.2k Viewers</span>
+                    <span className="text-metadata text-text-muted font-mono">1.2k viewers</span>
                   </div>
-                  <div className="p-3 bg-slate-950 border border-slate-850 rounded-lg flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
-                      <span className="text-xs font-bold text-slate-200">YouTube Live #2</span>
+
+                  <div className="p-3 bg-surface-canvas border border-border-default rounded-lg flex items-center justify-between transition-custom hover:bg-surface-hover select-none">
+                    <div className="flex items-center space-x-2.5">
+                      <span className="h-2 w-2 rounded-full bg-status-green"></span>
+                      <span className="text-body font-medium text-text-secondary">
+                        YouTube Live Feed
+                      </span>
                     </div>
-                    <span className="text-xxs text-indigo-400 font-mono">4.5k Viewers</span>
+                    <span className="text-metadata text-text-muted font-mono">4.5k viewers</span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-                <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-indigo-400" />
+              {/* Ingest metadata */}
+              <div className="bg-surface-card border border-border-default rounded-xl p-6 space-y-4 shadow-subtle">
+                <h3 className="font-semibold text-card-title text-text-primary flex items-center gap-2.5 select-none">
+                  <Globe className="h-4.5 w-4.5 text-accent" />
                   Ingest Integrations
                 </h3>
-                <div className="grid grid-cols-2 gap-2 text-xxs font-mono">
-                  <div className="p-2.5 bg-slate-950 border border-slate-850 rounded-lg text-slate-300 text-center">
-                    YouTube Ingest: <span className="text-emerald-400 font-bold">Active</span>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="p-3 bg-surface-canvas border border-border-default rounded-lg flex flex-col justify-between select-none">
+                    <span className="text-metadata font-mono text-text-muted uppercase">
+                      YouTube
+                    </span>
+                    <span className="text-body font-semibold text-status-green mt-1">active</span>
                   </div>
-                  <div className="p-2.5 bg-slate-950 border border-slate-855 rounded-lg text-slate-300 text-center">
-                    Twitch Ingest: <span className="text-emerald-400 font-bold">Active</span>
+                  <div className="p-3 bg-surface-canvas border border-border-default rounded-lg flex flex-col justify-between select-none">
+                    <span className="text-metadata font-mono text-text-muted uppercase">
+                      Twitch
+                    </span>
+                    <span className="text-body font-semibold text-status-green mt-1">active</span>
                   </div>
-                  <div className="p-2.5 bg-slate-950 border border-slate-855 rounded-lg text-slate-300 text-center">
-                    X Ingest: <span className="text-emerald-400 font-bold">Active</span>
+                  <div className="p-3 bg-surface-canvas border border-border-default rounded-lg flex flex-col justify-between select-none">
+                    <span className="text-metadata font-mono text-text-muted uppercase">
+                      X / Twitter
+                    </span>
+                    <span className="text-body font-semibold text-status-green mt-1">active</span>
                   </div>
-                  <div className="p-2.5 bg-slate-950 border border-slate-855 rounded-lg text-slate-300 text-center">
-                    TikTok Ingest: <span className="text-rose-400 font-bold">Muted</span>
+                  <div className="p-3 bg-surface-canvas border border-border-default rounded-lg flex flex-col justify-between select-none">
+                    <span className="text-metadata font-mono text-text-muted uppercase">
+                      TikTok
+                    </span>
+                    <span className="text-body font-semibold text-text-disabled mt-1">muted</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col items-center text-center space-y-3">
-              <h3 className="font-bold text-white text-xs uppercase tracking-wider text-slate-500">
+          {/* Right column sidebar elements */}
+          <div className="space-y-8">
+            {/* Community Health Score */}
+            <div className="bg-surface-card border border-border-default rounded-xl p-6 flex flex-col items-center text-center space-y-4 shadow-subtle">
+              <h3 className="text-metadata font-semibold text-text-muted tracking-tight select-none">
                 Community Health Score
               </h3>
-              <div className="relative h-28 w-28 flex items-center justify-center">
+
+              <div className="relative h-24 w-24 flex items-center justify-center">
                 <svg className="absolute inset-0 h-full w-full -rotate-90">
                   <circle
-                    cx="56"
-                    cy="56"
-                    r="48"
+                    cx="48"
+                    cy="48"
+                    r="40"
                     fill="transparent"
-                    stroke="#1e293b"
-                    strokeWidth="8"
+                    stroke="#E2E8F0"
+                    strokeWidth="4"
                   />
                   <circle
-                    cx="56"
-                    cy="56"
-                    r="48"
+                    cx="48"
+                    cy="48"
+                    r="40"
                     fill="transparent"
-                    stroke="#6366f1"
-                    strokeWidth="8"
-                    strokeDasharray={300}
-                    strokeDashoffset={60}
+                    stroke="var(--color-brand-primary)"
+                    strokeWidth="4"
+                    strokeDasharray={251}
+                    strokeDashoffset={251 - (251 * 82) / 100}
+                    strokeLinecap="round"
                   />
                 </svg>
-                <div className="text-xl font-extrabold text-white">82%</div>
+                <div className="text-section font-semibold text-text-primary font-mono select-none">
+                  82%
+                </div>
               </div>
-              <p className="text-slate-400 text-xxs">
-                Automated toxicity mitigation score across channels
+
+              <p className="text-text-muted text-metadata leading-relaxed select-none">
+                Automated toxicity mitigation score across active broadcast channels
               </p>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <h3 className="font-bold text-slate-400 text-xs uppercase tracking-wider">
-                  Triage Alerts
-                </h3>
-                <span className="text-[10px] text-indigo-400 font-semibold cursor-pointer hover:underline">
+            {/* Triage Alerts list */}
+            <div className="bg-surface-card border border-border-default rounded-xl p-6 space-y-4 shadow-subtle">
+              <div className="flex justify-between items-center pb-2 border-b border-border-default select-none">
+                <h3 className="font-semibold text-card-title text-text-primary">Triage Alerts</h3>
+                <span className="text-metadata text-accent font-medium cursor-pointer hover:underline">
                   View All
                 </span>
               </div>
-              {recentIncidents.map((incident) => (
-                <IncidentCard key={incident.id} {...incident} />
-              ))}
+              <div className="divide-y divide-border-default">
+                {recentIncidents.map((incident) => (
+                  <IncidentCard key={incident.id} {...incident} />
+                ))}
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <h3 className="font-bold text-slate-400 text-xs uppercase tracking-wider">
-                  AI Operations
-                </h3>
-                <span className="text-[10px] text-indigo-400 font-semibold cursor-pointer hover:underline">
+            {/* AI operations status */}
+            <div className="bg-surface-card border border-border-default rounded-xl p-6 space-y-4 shadow-subtle">
+              <div className="flex justify-between items-center pb-2 border-b border-border-default select-none">
+                <h3 className="font-semibold text-card-title text-text-primary">AI Operations</h3>
+                <span className="text-metadata text-accent font-medium cursor-pointer hover:underline">
                   View All
                 </span>
               </div>
-              {activeAgents.map((agent) => (
-                <AgentStatusCard key={agent.name} {...agent} />
-              ))}
+              <div className="divide-y divide-border-default">
+                {activeAgents.map((agent) => (
+                  <AgentStatusCard key={agent.name} {...agent} />
+                ))}
+              </div>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-              <h3 className="font-bold text-white text-xs uppercase tracking-wider text-slate-500">
+            {/* Audit log audits */}
+            <div className="bg-surface-card border border-border-default rounded-xl p-6 space-y-4 shadow-subtle">
+              <h3 className="font-semibold text-card-title text-text-primary pb-2 border-b border-border-default select-none">
                 Operational Log Audit
               </h3>
-              <ActivityTimeline items={timelineEvents} />
+              <div className="pt-2">
+                <ActivityTimeline items={timelineEvents} />
+              </div>
             </div>
           </div>
         </div>

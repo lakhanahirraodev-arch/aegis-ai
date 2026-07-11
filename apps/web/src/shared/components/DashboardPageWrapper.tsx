@@ -19,32 +19,34 @@ export default function DashboardPageWrapper({
   const [state, setState] = useState<"loaded" | "loading" | "empty" | "error">("loaded");
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-5 gap-4">
-        <div>
-          <div className="flex items-center space-x-2 text-xs font-mono text-slate-500 uppercase tracking-wider mb-2">
+    <div className="px-10 py-8 space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between border-b border-border-default pb-6 gap-6">
+        <div className="space-y-2">
+          {/* Breadcrumb: Metadata size (13px), muted text */}
+          <div className="flex items-center space-x-2 text-metadata text-text-muted select-none font-medium">
             <span>Aegis</span>
-            <span>/</span>
+            <span className="text-border-default">/</span>
             <span>{category}</span>
-            <span>/</span>
-            <span className="text-slate-300 font-semibold">{title}</span>
+            <span className="text-border-default">/</span>
+            <span className="text-text-secondary">{title}</span>
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">{title}</h2>
-          <p className="text-slate-400 text-sm mt-1">{description}</p>
+          {/* Title: Page Title size (28px) */}
+          <h2 className="text-title font-semibold text-text-primary tracking-tight">{title}</h2>
+          {/* Description: Body size (15px), secondary text */}
+          <p className="text-body text-text-secondary leading-relaxed max-w-3xl">{description}</p>
         </div>
 
-        <div className="flex items-center space-x-1.5 bg-slate-900 border border-slate-800 p-1 rounded-lg self-start">
-          <span className="text-[10px] font-mono text-slate-500 uppercase px-2 font-semibold">
-            Demo State:
-          </span>
+        {/* Demo State switcher - subtle & minimal capsule */}
+        <div className="flex items-center space-x-1.5 bg-surface-card border border-border-default p-1 rounded-lg self-start shrink-0 shadow-subtle">
           {(["loaded", "loading", "empty", "error"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setState(s)}
-              className={`px-2 py-1 rounded text-xxs font-mono uppercase font-semibold transition ${
+              className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-custom ${
                 state === s
-                  ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"
-                  : "text-slate-500 hover:text-slate-300 border border-transparent"
+                  ? "bg-accent-tint text-accent border border-accent/15"
+                  : "text-text-muted hover:text-text-secondary border border-transparent"
               }`}
             >
               {s}
@@ -53,33 +55,38 @@ export default function DashboardPageWrapper({
         </div>
       </div>
 
-      <div className="transition duration-150">
+      {/* Main Page Content / State Views */}
+      <div className="transition-custom">
         {state === "loading" && (
-          <div className="min-h-[350px] bg-slate-900/40 border border-slate-800/60 rounded-xl flex flex-col items-center justify-center p-12">
-            <Loader2 className="h-8 w-8 text-indigo-400 animate-spin mb-4" />
-            <p className="text-sm font-medium text-slate-300">Resolving workspace queries...</p>
-            <p className="text-xs text-slate-500 mt-1">
+          <div className="min-h-[400px] bg-surface-card border border-border-default rounded-xl flex flex-col items-center justify-center p-12 shadow-subtle">
+            <Loader2 className="h-8 w-8 text-accent animate-spin mb-4" />
+            <p className="text-body font-semibold text-text-primary">
+              Resolving workspace queries...
+            </p>
+            <p className="text-metadata text-text-muted mt-1">
               Applying global tenant constraints and client scopes
             </p>
-            <div className="w-64 bg-slate-950 h-1.5 rounded-full mt-4 overflow-hidden border border-slate-800">
-              <div className="bg-indigo-500 h-full rounded-full animate-pulse w-1/3"></div>
+            <div className="w-56 bg-surface-hover h-1.5 rounded-full mt-5 overflow-hidden border border-border-default">
+              <div className="bg-accent h-full rounded-full w-1/3 animate-pulse"></div>
             </div>
           </div>
         )}
 
         {state === "error" && (
-          <div className="min-h-[350px] bg-red-950/10 border border-red-500/20 rounded-xl flex flex-col items-center justify-center p-12 text-center">
-            <div className="h-12 w-12 bg-red-500/10 rounded-full border border-red-500/20 flex items-center justify-center mb-4 text-red-400">
-              <AlertCircle className="h-6 w-6" />
+          <div className="min-h-[400px] bg-surface-card border border-border-default rounded-xl flex flex-col items-center justify-center p-12 text-center shadow-subtle">
+            <div className="h-10 w-10 bg-status-red-bg rounded-full border border-status-red/10 flex items-center justify-center mb-4 text-status-red">
+              <AlertCircle className="h-5 w-5" />
             </div>
-            <h3 className="text-base font-bold text-white">Execution Fault Encountered</h3>
-            <p className="text-sm text-red-400/80 mt-2 max-w-md">
+            <h3 className="text-card-title font-semibold text-text-primary">
+              Execution Fault Encountered
+            </h3>
+            <p className="text-metadata text-text-muted mt-2 max-w-sm leading-relaxed">
               Failed to connect to workspace data proxy. Connection closed by transactional security
               boundary policy.
             </p>
             <button
               onClick={() => setState("loaded")}
-              className="mt-6 px-4 py-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-semibold rounded-lg transition"
+              className="mt-6 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-button font-medium rounded-xl transition-custom shadow-subtle"
             >
               Retry Connection
             </button>
@@ -87,12 +94,14 @@ export default function DashboardPageWrapper({
         )}
 
         {state === "empty" && (
-          <div className="min-h-[350px] bg-slate-900/40 border border-slate-800/60 rounded-xl flex flex-col items-center justify-center p-12 text-center">
-            <div className="h-12 w-12 bg-slate-800 rounded-full border border-slate-700/60 flex items-center justify-center mb-4 text-slate-400">
+          <div className="min-h-[400px] bg-surface-card border border-border-default rounded-xl flex flex-col items-center justify-center p-12 text-center shadow-subtle">
+            <div className="h-10 w-10 bg-surface-hover rounded-full border border-border-default flex items-center justify-center mb-4 text-text-muted">
               <FileQuestion className="h-5 w-5" />
             </div>
-            <h3 className="text-base font-bold text-white">No Telemetry Discovered</h3>
-            <p className="text-sm text-slate-400 mt-2 max-w-sm">
+            <h3 className="text-card-title font-semibold text-text-primary">
+              No Telemetry Discovered
+            </h3>
+            <p className="text-metadata text-text-muted mt-2 max-w-sm leading-relaxed">
               There is no data matching this capability criteria in the active workspace context.
               Configure monitors to ingest events.
             </p>

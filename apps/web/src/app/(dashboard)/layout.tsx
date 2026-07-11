@@ -13,18 +13,20 @@ import {
   Users,
   Search,
   Bell,
-  Sun,
-  Moon,
-  HelpCircle,
-  FolderLock,
+  ChevronLeft,
+  Menu,
 } from "lucide-react";
 import CommandPalette from "@/shared/components/CommandPalette";
+
+// Helper placeholder constants declared before usage to avoid TDZ errors
+const HelpCircle = Shield;
+const FolderLock = Shield;
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Listen for Ctrl+K command palette trigger
   useEffect(() => {
@@ -75,59 +77,74 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div
-      className={`flex h-screen overflow-hidden ${theme === "dark" ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"}`}
-    >
+    <div className="flex h-screen overflow-hidden bg-surface-canvas text-text-primary font-sans antialiased">
       {/* Command Palette */}
       <CommandPalette isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
-      {/* Sidebar */}
+      {/* Sidebar - Width: 260px (collapsed to 64px) */}
       <aside
-        className={`w-64 border-r flex flex-col transition duration-150 ${
-          theme === "dark" ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+        className={`bg-surface-sidebar border-r border-border-subtle flex flex-col z-20 transition-all duration-300 ${
+          sidebarCollapsed ? "w-16" : "w-[260px]"
         }`}
       >
-        {/* Top Header */}
-        <div
-          className={`p-4 border-b flex items-center space-x-2 ${
-            theme === "dark" ? "border-slate-800" : "border-slate-200"
-          }`}
-        >
-          <Shield className="h-6 w-6 text-indigo-500 animate-pulse" />
-          <span className="font-bold text-base bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent uppercase tracking-wider">
-            Aegis AI
-          </span>
+        {/* Top Logo Header */}
+        <div className="h-16 px-4 border-b border-border-subtle flex items-center justify-between shrink-0">
+          <div className="flex items-center space-x-3 overflow-hidden">
+            <div className="h-6 w-6 rounded-md bg-accent flex items-center justify-center shrink-0">
+              <Shield className="h-4.5 w-4.5 text-white" />
+            </div>
+            {!sidebarCollapsed && (
+              <span className="font-semibold text-card-title text-text-primary tracking-tight select-none">
+                Aegis AI
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="p-1 rounded hover:bg-surface-hover text-text-muted hover:text-text-primary transition-custom hidden md:block"
+            aria-label="Toggle Sidebar"
+          >
+            <ChevronLeft
+              className={`h-4 w-4 transition-transform duration-300 ${sidebarCollapsed ? "rotate-180" : ""}`}
+            />
+          </button>
         </div>
 
         {/* Workspace Switcher */}
-        <div
-          className={`p-4 border-b ${theme === "dark" ? "border-slate-800" : "border-slate-200"}`}
-        >
-          <div className="text-[10px] text-slate-500 font-mono uppercase tracking-wider mb-2 font-bold">
-            Active Workspace
-          </div>
-          <OrganizationSwitcher
-            appearance={{
-              elements: {
-                rootBox: "w-full",
-                organizationSwitcherTrigger: `w-full border py-1.5 px-3 rounded-lg flex items-center justify-between transition text-xs font-semibold ${
-                  theme === "dark"
-                    ? "bg-slate-950 border-slate-800 hover:bg-slate-900 text-slate-200"
-                    : "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-800"
-                }`,
-                organizationPreviewTextContainer: "text-left",
-              },
-            }}
-          />
+        <div className="p-4 border-b border-border-subtle shrink-0">
+          {!sidebarCollapsed ? (
+            <div className="space-y-1.5">
+              <div className="text-metadata text-text-muted px-1.5 font-medium select-none">
+                Workspace
+              </div>
+              <OrganizationSwitcher
+                appearance={{
+                  elements: {
+                    rootBox: "w-full",
+                    organizationSwitcherTrigger: `w-full border border-border-default py-1.5 px-3 rounded-md flex items-center justify-between transition-custom text-sidebar-label font-medium bg-surface-canvas hover:bg-surface-hover text-text-secondary`,
+                    organizationPreviewTextContainer: "text-left",
+                  },
+                }}
+              />
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="h-8 w-8 rounded-full bg-surface-canvas border border-border-default flex items-center justify-center text-text-secondary text-[12px] font-bold select-none">
+                WS
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Navigation list */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        <div className="flex-1 overflow-y-auto py-6 px-3 space-y-6">
           {navGroups.map((group) => (
             <div key={group.title} className="space-y-1.5">
-              <div className="text-[10px] text-slate-500 font-mono uppercase tracking-wider pl-3 font-bold">
-                {group.title}
-              </div>
+              {!sidebarCollapsed && (
+                <div className="text-metadata text-text-muted px-3.5 select-none font-medium tracking-wide">
+                  {group.title}
+                </div>
+              )}
               <div className="space-y-0.5">
                 {group.links.map((link) => {
                   const isActive = pathname === link.href;
@@ -135,20 +152,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-medium transition ${
+                      className={`group relative flex items-center rounded-md transition-custom font-medium ${
+                        sidebarCollapsed
+                          ? "justify-center p-2"
+                          : "space-x-3.5 px-3.5 py-2.5 text-sidebar-label"
+                      } ${
                         isActive
-                          ? theme === "dark"
-                            ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20"
-                            : "bg-indigo-50 text-indigo-600 border border-indigo-100"
-                          : theme === "dark"
-                            ? "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
-                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent"
+                          ? "bg-surface-hover text-accent"
+                          : "text-text-secondary hover:bg-surface-hover/60 hover:text-text-primary"
                       }`}
+                      title={link.name}
                     >
+                      {isActive && !sidebarCollapsed && (
+                        <div className="absolute left-0 top-2.5 bottom-2.5 w-0.75 bg-accent rounded-r" />
+                      )}
                       <link.icon
-                        className={`h-4 w-4 ${isActive ? "text-indigo-500" : "text-slate-500"}`}
+                        className={`h-4.5 w-4.5 shrink-0 transition-custom ${
+                          isActive ? "text-accent" : "text-text-muted group-hover:text-text-primary"
+                        }`}
                       />
-                      <span>{link.name}</span>
+                      {!sidebarCollapsed && <span>{link.name}</span>}
                     </Link>
                   );
                 })}
@@ -157,97 +180,78 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
         </div>
 
-        <div
-          className={`p-4 border-t text-center text-[10px] font-mono ${
-            theme === "dark"
-              ? "border-slate-800 bg-slate-950/20 text-slate-650"
-              : "border-slate-200 bg-slate-50 text-slate-500"
-          }`}
-        >
-          Sprint 3 Design Shell Active
-        </div>
+        {/* Sidebar Footer */}
+        {!sidebarCollapsed && (
+          <div className="p-4 border-t border-border-subtle text-center text-metadata font-mono text-text-muted select-none">
+            v0.1.0-alpha
+          </div>
+        )}
       </aside>
 
       {/* Main Content Viewport */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <header
-          className={`h-16 border-b flex items-center justify-between px-8 ${
-            theme === "dark" ? "bg-slate-900/50 border-slate-800" : "bg-white border-slate-200"
-          }`}
-        >
+        <header className="h-16 border-b border-border-subtle flex items-center justify-between px-8 bg-surface-canvas/90 backdrop-blur shrink-0 z-10">
           {/* Left panel: Search trigger */}
-          <button
-            onClick={() => setSearchOpen(true)}
-            className={`flex items-center space-x-3 px-3 py-1.5 rounded-lg border text-xs font-medium transition ${
-              theme === "dark"
-                ? "bg-slate-950 border-slate-800 hover:bg-slate-900 text-slate-500 hover:text-slate-400"
-                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-500 hover:text-slate-600"
-            }`}
-          >
-            <Search className="h-4 w-4" />
-            <span className="pr-8">Search console shortcuts...</span>
-            <kbd className="px-1.5 py-0.5 text-xxs font-mono bg-slate-900 border border-slate-800/80 rounded text-slate-500 uppercase font-semibold">
-              Ctrl+K
-            </kbd>
-          </button>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="p-1.5 rounded hover:bg-surface-hover text-text-muted hover:text-text-primary transition-custom md:hidden"
+              aria-label="Open Sidebar"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center space-x-2.5 px-3 py-1.5 rounded-md border border-border-default text-metadata font-medium transition-custom bg-surface-card hover:bg-surface-hover text-text-muted hover:text-text-secondary"
+            >
+              <Search className="h-4 w-4" />
+              <span className="pr-8">Search shortcuts...</span>
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-surface-canvas border border-border-default rounded text-text-muted uppercase select-none">
+                ⌘K
+              </kbd>
+            </button>
+          </div>
 
           {/* Right panel: User Actions */}
           <div className="flex items-center space-x-4">
-            {/* Theme switcher */}
-            <button
-              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-              className={`p-2 rounded-lg border transition ${
-                theme === "dark"
-                  ? "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
-                  : "bg-slate-50 border-slate-200 text-slate-650 hover:text-slate-800"
-              }`}
-              title="Toggle styling theme"
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
-
             {/* Notification triggers */}
             <div className="relative">
               <button
                 onClick={() => setNotificationOpen((o) => !o)}
-                className={`p-2 rounded-lg border transition relative ${
-                  theme === "dark"
-                    ? "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
-                    : "bg-slate-50 border-slate-200 text-slate-650 hover:text-slate-800"
-                }`}
+                className="p-2 rounded-md border border-border-default transition-custom bg-surface-card hover:bg-surface-hover text-text-muted hover:text-text-primary relative"
               >
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500 animate-ping"></span>
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500"></span>
+                <Bell className="h-4.5 w-4.5" />
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-accent"></span>
               </button>
 
               {/* Mock Notification Panel Popover */}
               {notificationOpen && (
-                <div
-                  className={`absolute right-0 mt-2 w-80 rounded-xl border p-4 shadow-2xl z-35 space-y-3 ${
-                    theme === "dark" ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-                  }`}
-                >
-                  <div className="flex justify-between items-center pb-2 border-b border-slate-800/50">
-                    <span className="text-xs font-bold text-slate-200">Workspace Alerts</span>
+                <div className="absolute right-0 mt-3 w-80 rounded-xl border border-border-default p-4 shadow-xl bg-surface-elevated z-30 space-y-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-border-subtle">
+                    <span className="text-metadata font-semibold text-text-primary">
+                      Workspace Alerts
+                    </span>
                     <button
                       onClick={() => setNotificationOpen(false)}
-                      className="text-[10px] text-indigo-400 font-semibold uppercase hover:underline"
+                      className="text-[12px] text-accent font-medium hover:underline"
                     >
                       Dismiss All
                     </button>
                   </div>
-                  <div className="space-y-2.5 max-h-[200px] overflow-y-auto">
-                    <div className="p-2 bg-slate-950/40 rounded border border-slate-850/40 text-xxs leading-relaxed">
-                      <div className="font-bold text-slate-300">Identity Guard Alert</div>
-                      <p className="text-slate-500 mt-0.5">
+                  <div className="space-y-2 max-h-[220px] overflow-y-auto">
+                    <div className="p-3 bg-surface-card rounded-md border border-border-subtle text-metadata leading-relaxed">
+                      <div className="font-semibold text-text-secondary">Identity Guard Alert</div>
+                      <p className="text-text-muted mt-0.5">
                         Scanned lookalike account detected on X/Twitter.
                       </p>
                     </div>
-                    <div className="p-2 bg-slate-950/40 rounded border border-slate-850/40 text-xxs leading-relaxed">
-                      <div className="font-bold text-slate-300">AI Agent Scan Run Complete</div>
-                      <p className="text-slate-500 mt-0.5">
+                    <div className="p-3 bg-surface-card rounded-md border border-border-subtle text-metadata leading-relaxed">
+                      <div className="font-semibold text-text-secondary">
+                        AI Agent Scan Run Complete
+                      </div>
+                      <p className="text-text-muted mt-0.5">
                         Discovery Agent finalized 15 YouTube copyright checks.
                       </p>
                     </div>
@@ -256,18 +260,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
             </div>
 
+            <div className="h-5 w-px bg-border-subtle" />
             <UserButton afterSignOutUrl="/sign-in" />
           </div>
         </header>
 
         {/* Dynamic Page Container */}
-        <main
-          className={`flex-1 overflow-y-auto p-8 transition ${
-            theme === "dark" ? "bg-slate-950" : "bg-slate-100"
-          }`}
-        >
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto bg-surface-canvas">{children}</main>
       </div>
     </div>
   );

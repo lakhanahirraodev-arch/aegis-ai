@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 // 1. STAT CARD
 interface StatCardProps {
@@ -13,26 +12,26 @@ interface StatCardProps {
 }
 
 export function StatCard({ title, value, trend, trendDirection, description }: StatCardProps) {
+  const isUp = trendDirection === "up";
+  const isDown = trendDirection === "down";
+
   return (
-    <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
-      <div className="flex justify-between items-center text-xs font-medium text-slate-500 uppercase tracking-wider">
-        <span>{title}</span>
-        <div
-          className={`flex items-center space-x-0.5 text-xs font-semibold px-2 py-0.5 rounded-full ${
-            trendDirection === "up"
-              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-              : trendDirection === "down"
-                ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                : "bg-slate-800 text-slate-400 border border-slate-700"
-          }`}
-        >
-          {trendDirection === "up" && <ArrowUpRight className="h-3 w-3" />}
-          {trendDirection === "down" && <ArrowDownRight className="h-3 w-3" />}
-          <span>{trend}</span>
-        </div>
+    <div className="bg-surface-card border border-border-subtle p-6 rounded-xl space-y-3 select-none shadow-subtle">
+      <div className="flex justify-between items-start">
+        <span className="text-metadata font-medium text-text-muted">{title}</span>
+        {trend !== "Stable" && trend !== "None" && trend !== "Receiving" && (
+          <span
+            className={`inline-flex items-center text-metadata font-semibold font-mono ${
+              isUp ? "text-status-green" : isDown ? "text-status-red" : "text-text-muted"
+            }`}
+          >
+            {isUp && "+"}
+            {trend}
+          </span>
+        )}
       </div>
-      <div className="text-2xl font-bold text-white tracking-tight">{value}</div>
-      <p className="text-slate-400 text-xs">{description}</p>
+      <div className="text-number font-bold text-text-primary tracking-tight">{value}</div>
+      <div className="text-metadata text-text-secondary leading-normal">{description}</div>
     </div>
   );
 }
@@ -40,29 +39,31 @@ export function StatCard({ title, value, trend, trendDirection, description }: S
 // 2. MOCK AREA CHART
 export function MockAreaChart() {
   return (
-    <div className="h-48 w-full bg-slate-950 rounded-lg border border-slate-850 p-4 relative overflow-hidden flex items-end">
-      <div className="absolute inset-0 flex flex-col justify-between p-4 pointer-events-none opacity-20">
-        <div className="border-t border-slate-800 w-full"></div>
-        <div className="border-t border-slate-800 w-full"></div>
-        <div className="border-t border-slate-800 w-full"></div>
+    <div className="h-44 w-full bg-surface-card rounded-xl border border-border-subtle p-4 relative overflow-hidden flex items-end">
+      {/* Subtle Grid Lines (4% gray opacity) */}
+      <div className="absolute inset-0 flex flex-col justify-between p-4 pointer-events-none opacity-5">
+        <div className="border-t border-text-muted w-full"></div>
+        <div className="border-t border-text-muted w-full"></div>
+        <div className="border-t border-text-muted w-full"></div>
       </div>
 
       <svg className="w-full h-full" viewBox="0 0 400 120" preserveAspectRatio="none">
         <defs>
           <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path
-          d="M0,100 C50,80 80,40 120,60 C160,80 200,20 240,40 C280,60 320,10 360,30 L400,10 L400,120 L0,120 Z"
+          d="M0,100 C50,80 80,45 120,65 C160,85 200,25 240,45 C280,65 320,15 360,35 L400,15 L400,120 L0,120 Z"
           fill="url(#chartGrad)"
         />
         <path
-          d="M0,100 C50,80 80,40 120,60 C160,80 200,20 240,40 C280,60 320,10 360,30 L400,10"
+          d="M0,100 C50,80 80,45 120,65 C160,85 200,25 240,45 C280,65 320,15 360,35 L400,15"
           fill="none"
-          stroke="#818cf8"
-          strokeWidth="2.5"
+          stroke="#3B82F6"
+          strokeWidth="2"
+          strokeLinecap="round"
         />
       </svg>
     </div>
@@ -73,19 +74,23 @@ export function MockAreaChart() {
 export function MockBarChart() {
   const bars = [40, 60, 45, 80, 55, 90, 70, 85, 60, 75, 50, 65, 80, 95, 85];
   return (
-    <div className="h-48 w-full bg-slate-950 rounded-lg border border-slate-850 p-6 flex items-end justify-between space-x-1.5">
-      {bars.map((height, i) => (
-        <div key={i} className="flex-1 flex flex-col items-center">
-          <div
-            className="w-full bg-gradient-to-t from-indigo-600 to-cyan-500 rounded-t group relative hover:opacity-80 transition duration-150"
-            style={{ height: `${height}%` }}
-          >
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-800 text-[10px] text-slate-200 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none font-mono">
+    <div className="h-44 w-full bg-surface-card rounded-xl border border-border-subtle p-5 flex items-end justify-between space-x-1.5">
+      {bars.map((height, i) => {
+        const isHighlighted = i === 13;
+        return (
+          <div key={i} className="flex-1 h-full flex flex-col justify-end group relative">
+            <div
+              className={`w-full rounded-t transition-custom ${
+                isHighlighted ? "bg-accent" : "bg-[#E2E8F0] hover:bg-[#CBD5E1]"
+              }`}
+              style={{ height: `${height}%` }}
+            />
+            <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-surface-elevated border border-border-default text-metadata text-text-secondary px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-custom pointer-events-none font-mono shadow-subtle">
               {height}%
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -102,24 +107,32 @@ interface TimelineItem {
 
 export function ActivityTimeline({ items }: { items: TimelineItem[] }) {
   return (
-    <div className="space-y-4">
-      {items.map((item) => (
-        <div
-          key={item.id}
-          className="flex items-start space-x-3 border-l-2 border-slate-800 pl-4 relative ml-2 py-1"
-        >
-          <div className="absolute -left-1.5 top-2.5 h-3 w-3 rounded-full bg-slate-850 border-2 border-indigo-500"></div>
-          <div className="flex-1 space-y-1">
+    <div className="space-y-6">
+      {items.map((item, idx) => (
+        <div key={item.id} className="relative flex items-start space-x-4 group">
+          {/* Vertical line between items */}
+          {idx < items.length - 1 && (
+            <div className="absolute left-[3px] top-[14px] bottom-[-28px] w-0.5 bg-border-default" />
+          )}
+
+          {/* Status Indicator (Simple 8px Circle) */}
+          <div className="mt-1 h-2 w-2 rounded-full bg-surface-hover flex items-center justify-center shrink-0 border border-border-default z-10">
+            <div
+              className={`h-1.5 w-1.5 rounded-full ${item.status === "SUCCESS" ? "bg-accent" : "bg-status-red"}`}
+            />
+          </div>
+
+          <div className="flex-1 min-w-0 space-y-1 select-none">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-200">{item.event}</span>
-              <span className="text-xxs font-mono text-slate-500">{item.time}</span>
+              <span className="text-card-title font-medium text-text-primary">{item.event}</span>
+              <span className="text-metadata font-mono text-text-muted">{item.time}</span>
             </div>
-            <p className="text-xs text-slate-400">{item.details}</p>
-            <div className="flex items-center space-x-2 text-[10px] text-slate-500 font-mono">
+            <p className="text-body text-text-secondary leading-relaxed">{item.details}</p>
+            <div className="flex items-center space-x-2.5 text-metadata text-text-muted font-mono pt-0.5">
               <span>Actor: {item.actor}</span>
               <span>•</span>
-              <span className={item.status === "SUCCESS" ? "text-emerald-400" : "text-rose-400"}>
-                {item.status}
+              <span className={item.status === "SUCCESS" ? "text-status-green" : "text-status-red"}>
+                {item.status.toLowerCase()}
               </span>
             </div>
           </div>

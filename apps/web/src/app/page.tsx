@@ -1,173 +1,197 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { Shield, FileText, Search, Activity, Lock, Users, Clock } from "@aegis/ui";
+import { Shield, Compass, Lock, Activity, Eye, FileText, Globe } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-indigo-600/10 rounded-lg border border-indigo-500/20 text-indigo-400">
-              <Shield className="h-6 w-6 animate-pulse" />
+    <div className="flex flex-col min-h-screen bg-surface-canvas text-text-primary selection:bg-accent/20 font-sans antialiased">
+      {/* Header Bar */}
+      <header className="border-b border-border-subtle bg-surface-canvas/90 backdrop-blur sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-3 select-none">
+            <div className="h-6 w-6 rounded-md bg-accent flex items-center justify-center">
+              <Shield className="h-4.5 w-4.5 text-white" />
             </div>
-            <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-              AEGIS AI
+            <span className="font-semibold text-card-title text-text-primary tracking-tight">
+              Aegis AI
             </span>
-            <span className="px-2 py-0.5 text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full font-medium">
-              OS v1.0.0-scaffold
+            <span className="px-2 py-0.5 text-metadata bg-surface-hover text-text-muted border border-border-default rounded-md">
+              v0.1.0-preview
             </span>
           </div>
-          <nav className="flex items-center space-x-4">
-            <span className="text-sm text-slate-400 font-medium">System Status:</span>
-            <div className="flex items-center space-x-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-semibold">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 bg-status-green/5 text-status-green border border-status-green/10 px-3 py-1 rounded-md text-metadata font-mono select-none">
+              <span className="h-1.5 w-1.5 rounded-full bg-status-green"></span>
               <span>All Systems Operational</span>
             </div>
-          </nav>
+          </div>
         </div>
       </header>
 
-      {/* Main Dashboard Preview Content */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        {/* Hero Section */}
-        <section className="mb-10 text-center md:text-left md:flex md:items-center md:justify-between border-b border-slate-800 pb-8">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              Trust & Safety Operating System
-            </h1>
-            <p className="mt-3 text-lg text-slate-400 max-w-2xl">
-              Real-time threat discovery, evidence locker preservation, and community moderation for
-              creators and brands.
-            </p>
+      {/* Main Core View Area */}
+      <main className="flex-1 max-w-5xl mx-auto px-6 py-12 w-full flex flex-col justify-center space-y-12">
+        {/* Main Hero Header Section */}
+        <section className="text-center space-y-6 max-w-3xl mx-auto py-6">
+          <div className="inline-flex items-center space-x-2.5 px-3.5 py-1.5 bg-accent-tint text-accent border border-accent/10 rounded-full text-metadata font-medium select-none">
+            <span>Intelligent Trust & Safety OS for Creators</span>
           </div>
-          <div className="mt-6 md:mt-0 flex space-x-3 justify-center">
+
+          <h1 className="text-hero font-semibold text-text-primary tracking-tight leading-tight">
+            Quiet, professional protection for your digital likeness and community.
+          </h1>
+
+          <p className="text-body text-text-secondary leading-relaxed max-w-2xl mx-auto">
+            Aegis AI runs silently in the background, analyzing copyright threats, tracking brand
+            impersonators, and auto-moderating chat streams so you can focus on building your
+            audience.
+          </p>
+
+          <div className="pt-4 flex flex-col sm:flex-row justify-center items-center gap-4">
             <SignedIn>
               <Link
                 href="/dashboard"
-                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-lg hover:shadow-indigo-500/20 transition duration-150"
+                className="px-6 py-3 bg-accent hover:bg-accent-hover text-white text-button font-medium rounded-xl transition-custom shadow-lg shadow-accent/10 w-full sm:w-auto"
               >
-                Go to Dashboard
+                Open Workspace Console
               </Link>
             </SignedIn>
             <SignedOut>
               <Link
                 href="/sign-in"
-                className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 rounded-lg text-sm font-semibold transition duration-150"
+                className="px-6 py-3 bg-surface-card border border-border-default hover:bg-surface-hover text-text-secondary text-button font-medium rounded-xl transition-custom w-full sm:w-auto text-center"
               >
                 Sign In
               </Link>
               <Link
                 href="/sign-up"
-                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-lg hover:shadow-indigo-500/20 transition duration-150"
+                className="px-6 py-3 bg-accent hover:bg-accent-hover text-white text-button font-medium rounded-xl transition-custom shadow-lg shadow-accent/10 w-full sm:w-auto text-center"
               >
-                Register Workspace
+                Create Creator Account
               </Link>
             </SignedOut>
           </div>
         </section>
 
-        {/* Feature Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-xl hover:border-indigo-500/30 transition duration-300 group">
-            <div className="h-10 w-10 bg-indigo-500/10 rounded-lg border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-              <Lock className="h-5 w-5" />
+        {/* Feature Grid Overhaul */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+          {/* Card 1 */}
+          <div className="p-6 bg-surface-card border border-border-subtle rounded-xl hover:border-border-default transition-custom group select-none flex flex-col justify-between min-h-[180px]">
+            <div>
+              <div className="h-9 w-9 bg-surface-canvas rounded-lg border border-border-default text-text-muted flex items-center justify-center mb-4 transition-custom group-hover:text-accent">
+                <Lock className="h-4.5 w-4.5" />
+              </div>
+              <h3 className="text-card-title font-semibold text-text-primary mb-2">
+                Likeness Safeguard
+              </h3>
+              <p className="text-metadata text-text-secondary leading-relaxed">
+                Tracks digital lookalike profiles, platform handle squatters, and impersonations
+                across major platforms.
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Identity & Reputation</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Monitors social networks for lookalike handles and deepfake profiles to protect your
-              brand likeness.
-            </p>
           </div>
 
-          <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-xl hover:border-cyan-500/30 transition duration-300 group">
-            <div className="h-10 w-10 bg-cyan-500/10 rounded-lg border border-cyan-500/20 text-cyan-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-              <Search className="h-5 w-5" />
+          {/* Card 2 */}
+          <div className="p-6 bg-surface-card border border-border-subtle rounded-xl hover:border-border-default transition-custom group select-none flex flex-col justify-between min-h-[180px]">
+            <div>
+              <div className="h-9 w-9 bg-surface-canvas rounded-lg border border-border-default text-text-muted flex items-center justify-center mb-4 transition-custom group-hover:text-accent">
+                <Compass className="h-4.5 w-4.5" />
+              </div>
+              <h3 className="text-card-title font-semibold text-text-primary mb-2">
+                Content Defense
+              </h3>
+              <p className="text-metadata text-text-secondary leading-relaxed">
+                Monitors voice cloning indices, deepfake media uploads, and unauthorized copyright
+                distributions.
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Content Protection</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Scans media hosting sites for duplicate assets, audio voice clones, and copyrighted
-              video re-uploads.
-            </p>
           </div>
 
-          <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-xl hover:border-rose-500/30 transition duration-300 group">
-            <div className="h-10 w-10 bg-rose-500/10 rounded-lg border border-rose-500/20 text-rose-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-              <Activity className="h-5 w-5" />
+          {/* Card 3 */}
+          <div className="p-6 bg-surface-card border border-border-subtle rounded-xl hover:border-border-default transition-custom group select-none flex flex-col justify-between min-h-[180px]">
+            <div>
+              {/* AI Violet reserved exclusively for AI features */}
+              <div className="h-9 w-9 bg-ai-surface rounded-lg border border-ai-accent/15 text-ai-accent flex items-center justify-center mb-4 transition-custom">
+                <Activity className="h-4.5 w-4.5" />
+              </div>
+              <h3 className="text-card-title font-semibold text-text-primary mb-2">
+                Live Guardian AI
+              </h3>
+              <p className="text-metadata text-text-secondary leading-relaxed">
+                Ingests live streams at ultra-low latency, auto-moderating raids and flagging chat
+                toxicity.
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Live Stream Guardian</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Ingests live chat feeds at low latency to filter toxicity and protect stream
-              integrity.
-            </p>
           </div>
         </div>
 
-        {/* Console Summary */}
-        <section className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-          <div className="px-6 py-4 border-b border-slate-800 bg-slate-950/80 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="h-3 w-3 rounded-full bg-indigo-500"></div>
-              <span className="text-xs font-mono text-slate-400 uppercase tracking-widest">
+        {/* Console Overview Status Card */}
+        <section className="bg-surface-card border border-border-subtle rounded-xl overflow-hidden shadow-2xl">
+          <div className="px-6 py-4 border-b border-border-subtle bg-surface-sidebar flex items-center justify-between">
+            <div className="flex items-center space-x-2.5">
+              <span className="h-2 w-2 rounded-full bg-status-blue"></span>
+              <span className="text-metadata font-mono text-text-muted uppercase">
                 Active System Status
               </span>
             </div>
-            <span className="text-xs font-mono text-indigo-400 font-bold">
-              100% Mock Connectivity
+            <span className="text-metadata font-mono text-accent font-semibold">
+              Live Ingestion Pipeline
             </span>
           </div>
-          <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/80 flex flex-col justify-between">
+
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 select-none">
+            <div className="bg-surface-canvas p-4 rounded-xl border border-border-default flex flex-col justify-between min-h-[90px]">
               <div>
-                <span className="text-xs font-medium text-slate-500 block uppercase tracking-wider mb-1">
+                <span className="text-metadata font-medium text-text-muted block uppercase">
                   Detections
                 </span>
-                <span className="text-2xl font-bold text-white">0</span>
+                <span className="text-number font-bold text-text-primary mt-1 block">0</span>
               </div>
-              <div className="mt-4 flex items-center text-xs text-slate-400 space-x-1.5">
-                <Shield className="h-3.5 w-3.5 text-slate-500" />
-                <span>Scans Ready</span>
+              <div className="mt-3 flex items-center text-metadata text-text-muted space-x-2">
+                <Shield className="h-4 w-4" />
+                <span>Guardian Secure</span>
               </div>
             </div>
 
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/80 flex flex-col justify-between">
+            <div className="bg-surface-canvas p-4 rounded-xl border border-border-default flex flex-col justify-between min-h-[90px]">
               <div>
-                <span className="text-xs font-medium text-slate-500 block uppercase tracking-wider mb-1">
+                <span className="text-metadata font-medium text-text-muted block uppercase">
                   Open Cases
                 </span>
-                <span className="text-2xl font-bold text-white">0</span>
+                <span className="text-number font-bold text-text-primary mt-1 block">0</span>
               </div>
-              <div className="mt-4 flex items-center text-xs text-slate-400 space-x-1.5">
-                <FileText className="h-3.5 w-3.5 text-slate-500" />
-                <span>No Actions Required</span>
-              </div>
-            </div>
-
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/80 flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-medium text-slate-500 block uppercase tracking-wider mb-1">
-                  Live Channels
-                </span>
-                <span className="text-2xl font-bold text-white">0</span>
-              </div>
-              <div className="mt-4 flex items-center text-xs text-slate-400 space-x-1.5">
-                <Users className="h-3.5 w-3.5 text-slate-500" />
-                <span>No Streams Active</span>
+              <div className="mt-3 flex items-center text-metadata text-text-muted space-x-2">
+                <FileText className="h-4 w-4" />
+                <span>No action required</span>
               </div>
             </div>
 
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/80 flex flex-col justify-between">
+            <div className="bg-surface-canvas p-4 rounded-xl border border-border-default flex flex-col justify-between min-h-[90px]">
               <div>
-                <span className="text-xs font-medium text-slate-500 block uppercase tracking-wider mb-1">
-                  Average Latency
+                <span className="text-metadata font-medium text-text-muted block uppercase">
+                  Live Streams
                 </span>
-                <span className="text-2xl font-bold text-indigo-400">0 ms</span>
+                <span className="text-number font-bold text-text-primary mt-1 block">0</span>
               </div>
-              <div className="mt-4 flex items-center text-xs text-slate-400 space-x-1.5">
-                <Clock className="h-3.5 w-3.5 text-indigo-500" />
-                <span>Scaffold Pipeline OK</span>
+              <div className="mt-3 flex items-center text-metadata text-text-muted space-x-2">
+                <Eye className="h-4 w-4" />
+                <span>Ready to ingest</span>
+              </div>
+            </div>
+
+            <div className="bg-surface-canvas p-4 rounded-xl border border-border-default flex flex-col justify-between min-h-[90px]">
+              <div>
+                <span className="text-metadata font-medium text-text-muted block uppercase">
+                  Ingest Integrations
+                </span>
+                <span className="text-number font-bold text-accent mt-1 block">3</span>
+              </div>
+              <div className="mt-3 flex items-center text-metadata text-text-muted space-x-2">
+                <Globe className="h-4 w-4 text-accent" />
+                <span>YouTube Twitch Discord</span>
               </div>
             </div>
           </div>
@@ -175,9 +199,9 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 text-center text-slate-600 text-xs">
-          Aegis AI operating system architecture scaffold. Ready for Phase 1.
+      <footer className="border-t border-border-subtle bg-surface-sidebar py-6 mt-12 select-none">
+        <div className="max-w-6xl mx-auto px-6 text-center text-text-muted text-metadata">
+          Aegis AI Operating System. Built with privacy and protection first.
         </div>
       </footer>
     </div>

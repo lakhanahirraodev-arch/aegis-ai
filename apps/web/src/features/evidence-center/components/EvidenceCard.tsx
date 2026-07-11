@@ -12,31 +12,35 @@ interface EvidenceCardProps {
 
 export function EvidenceCard({ filename, hash, size, capturedAt, holdStatus }: EvidenceCardProps) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="text-xs font-bold text-slate-200 truncate max-w-[200px]">{filename}</h4>
-          <span className="text-[10px] text-slate-500 font-mono">{size}</span>
+    <div className="bg-surface-card border border-border-subtle rounded-xl p-6 space-y-4 select-none">
+      <div className="flex justify-between items-start gap-4">
+        <div className="min-w-0">
+          <h4 className="text-card-title font-medium text-text-primary truncate max-w-[200px]">
+            {filename}
+          </h4>
+          <span className="text-metadata text-text-muted font-mono">{size}</span>
         </div>
         <span
-          className={`text-xxs px-2.5 py-0.5 rounded-full font-bold border ${
+          className={`text-metadata px-2.5 py-0.5 rounded-md font-mono border shrink-0 ${
             holdStatus
-              ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-              : "bg-slate-950 text-slate-500 border-slate-850"
+              ? "bg-status-amber-bg text-status-amber border-status-amber/10"
+              : "bg-surface-canvas text-text-muted border-border-default"
           }`}
         >
           {holdStatus ? "Legal Hold" : "Standard Archive"}
         </span>
       </div>
-      <div className="bg-slate-950 p-2 rounded border border-slate-850/50 space-y-1">
-        <div className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">
+
+      <div className="bg-surface-canvas p-3 rounded-lg border border-border-default space-y-1">
+        <div className="text-metadata text-text-muted font-mono uppercase tracking-wider">
           SHA-256 Checksum
         </div>
-        <div className="text-xxs text-slate-400 font-mono truncate">{hash}</div>
+        <div className="text-metadata text-text-secondary font-mono truncate">{hash}</div>
       </div>
-      <div className="flex justify-between items-center text-[10px] text-slate-500 font-mono">
+
+      <div className="flex justify-between items-center text-metadata text-text-muted font-mono pt-1">
         <span>Preserved: {capturedAt}</span>
-        <span className="text-emerald-400 font-semibold">Verified Safe</span>
+        <span className="text-status-green font-medium">Verified Safe</span>
       </div>
     </div>
   );
